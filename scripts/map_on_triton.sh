@@ -27,7 +27,7 @@ Please enter a command: send, clean, tophat, bowtie.
 
 Usage: ${curr_file} <1: tophat|bowtie|send|clean > <2: path to data on biowhat > <3: where to put data on Triton > <4: genome > <5: username on biowhat > <6: email address >
 
-For help, please contact karmelallison@ucsd.edu"
+For help, please see https://sites.google.com/a/glasso.me/glasslab/computational-guides/using-map_on_triton-sh"
 	exit
 fi
 
