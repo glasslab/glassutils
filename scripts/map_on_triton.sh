@@ -47,11 +47,11 @@ else
 			echo "Cannot delete specified directory."
 			exit
 		fi
-		echo -n "Are you sure you want to remove the entire directory ${DATA_DIR}? [Y/n]"
+		echo -n "Are you sure you want to remove the entire directory ${DATA_DIR}? [Y/n] "
 		read -e CONFIRM
 		if [ "$CONFIRM" == "Y" ] || [ "$CONFIRM" == "y" ] || [ "$CONFIRM" == "yes" ]; then
 			echo "Deleting ${DATA_DIR}."
-			#rm -r $DATA_DIR
+			rm -r $DATA_DIR
 			exit
 		else
 			echo "Not deleting ${DATA_DIR}. Exiting."
