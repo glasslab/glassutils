@@ -10,13 +10,13 @@ BOWTIE_INDEXES=/projects/glass-lab/bioinformatics/bowtie2/indexes
 GTF_FILES=/projects/glass-lab/bioinformatics/tophat2/gtf
 
 if [ "$GENOME" == "" ]; then
-  GENOME="mm9"
+	GENOME="mm9"
 fi
 if [ "$BIOWHAT_USER" == "" ]; then
-  BIOWHAT_USER="$USER"
+	BIOWHAT_USER="$USER"
 fi
 if [ "$EMAIL" == "" ]; then
-  EMAIL="$USER@ucsd.edu"
+	EMAIL="$USER@ucsd.edu"
 fi
 
 # Get File locations
@@ -45,10 +45,14 @@ else
 	else
 		# Set up operation
 		if [ "$CMD" == "tophat"]; then
-			OP = "perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 8 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 ${fastq}"
+			OP="perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 ${fastq}"
+			WTIME="10:00:00"
+			NODES="nodes=1:ppn=1"
 		else
 			if [ "$CMD" == "bowtie"]; then
-				OP = "perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 ${fastq}"
+				OP="perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 ${fastq}"
+				WTIME="3:00:00"
+				NODES="nodes=1:ppn=8"
 			else
 				echo "Did not recognize command '${CMD}'. Exiting."
 				exit
@@ -57,7 +61,6 @@ else
 		
 		# Move files over
 		scp -r $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR $TO_DIR 
-
 
 
 		# Decompress files, combine.
@@ -75,13 +78,14 @@ else
 			echo "#!/bin/bash
 			#PBS -q small
 			#PBS -N ${bname_fq}
-			#PBS -l nodes=1:ppn=8
-			#PBS -l walltime=10:00:00
+			#PBS -l ${NODES}
+			#PBS -l walltime=${WTIME}
 			#PBS -o ${fastq}.torque_output.txt
 			#PBS -e ${fastq}.torque_error.txt
 			#PBS -V
 			#PBS -M ${EMAIL}
 			#PBS -m abe
+			#PBS -A glass-lab
 
 			cd /phase1/${USER}
 
