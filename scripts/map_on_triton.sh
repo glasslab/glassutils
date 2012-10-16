@@ -21,7 +21,7 @@ fi
 
 if [ "$CMD" == "" ] || [ "$CMD" == "help" ]; then
 	echo "Please enter a command: send, clean, tophat, bowtie."
-	curr_file = `basename ${0}`
+	curr_file=`basename ${0}`
 	echo "Usage: ${curr_file} <1: send|clean|tophat|bowtie > <2: path to data on biowhat > <3: where to put data on Triton > <4: genome > <5: username on biowhat > <6: email address >"
 	echo "For help, please contact karmelallison@ucsd.edu"
 	exit
