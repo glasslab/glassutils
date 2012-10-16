@@ -19,6 +19,14 @@ if [ "$EMAIL" == "" ]; then
 	EMAIL="$USER@ucsd.edu"
 fi
 
+if [ "$CMD" == ""] || [ "$CMD" == "help"]; then
+	echo "Please enter a command: send, clean, tophat, bowtie."
+	echo "Usage: ${0} [send|clean|tophat|bowtie] <path to data on biowhat> <where to put data on Triton> <genome> <username on biowhat> <email address>"
+	echo "For help, please contact karmelallison@ucsd.edu"
+	exit
+fi
+
+
 # Get File locations
 DATA_DIR=$TO_DIR/`basename $GET_DIR`
 
