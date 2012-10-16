@@ -25,7 +25,7 @@ if [ "$CMD" == "" ] || [ "$CMD" == "help" ]; then
 	echo "
 Please enter a command: send, clean, tophat, bowtie.
 
-Usage: ${curr_file} <1: send|clean|tophat|bowtie > <2: path to data on biowhat > <3: where to put data on Triton > <4: genome > <5: username on biowhat > <6: email address >
+Usage: ${curr_file} <1: tophat|bowtie|send|clean > <2: path to data on biowhat > <3: where to put data on Triton > <4: genome > <5: username on biowhat > <6: email address >
 
 For help, please contact karmelallison@ucsd.edu"
 	exit
@@ -37,7 +37,9 @@ DATA_DIR=$TO_DIR/`basename $GET_DIR`
 
 if [ "$CMD" == "send" ]; then
 	echo "Copying ${DATA_DIR} to ${BIOWHAT_USER}@biowhat.ucsd.edu:${GET_DIR}..."
-	scp -r $DATA_DIR/*/*${GENOME}* $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR 
+	mkdir $DATA_DIR/processed
+	mv $DATA_DIR/*/*${GENOME}* $DATA_DIR/processed
+	scp -r $DATA_DIR/processed $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR 
 	exit
 else
 	if [ "$CMD" == "clean" ]; then
@@ -58,12 +60,12 @@ else
 	else
 		# Set up operation
 		if [ "$CMD" == "tophat" ]; then
-			OP="perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 ${fastq}"
+			OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 ${fastq}"
 			WTIME="10:00:00"
 			NODES="nodes=1:ppn=1"
 		else
 			if [ "$CMD" == "bowtie" ]; then
-				OP="perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 ${fastq}"
+				OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 ${fastq}"
 				WTIME="3:00:00"
 				NODES="nodes=1:ppn=8"
 			else
@@ -80,17 +82,17 @@ else
 		for SUB_DIR in $DATA_DIR/*
 		  do
 		    bname=`basename $SUB_DIR`
-		    zcat $SUB_DIR/*.gz > $SUB_DIR/$bname.fq
+		    zcat $SUB_DIR/*.gz > $SUB_DIR/$bname.fastq
 		  done
 
 		# Create PBS file for each
-		for fastq in $DATA_DIR/*/*.fq
+		for fastq in $DATA_DIR/*/*.fastq
 		  do
-			bname_fq=`basename $fastq`
-			job_file=$DATA_DIR/${bname_fq}_job_file.sh
+			bname_fastq=`basename $fastq`
+			job_file=$DATA_DIR/${bname_fastq}_job_file.sh
 			echo "#!/bin/bash
 			#PBS -q small
-			#PBS -N ${bname_fq}
+			#PBS -N ${bname_fastq}
 			#PBS -l ${NODES}
 			#PBS -l walltime=${WTIME}
 			#PBS -o ${fastq}.torque_output.txt
