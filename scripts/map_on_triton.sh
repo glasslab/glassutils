@@ -19,7 +19,7 @@ if [ "$EMAIL" == "" ]; then
 	EMAIL="$USER@ucsd.edu"
 fi
 
-if [ "$CMD" == ""] || [ "$CMD" == "help"]; then
+if [ "$CMD" == "" ] || [ "$CMD" == "help" ]; then
 	echo "Please enter a command: send, clean, tophat, bowtie."
 	echo "Usage: ${0} [send|clean|tophat|bowtie] <path to data on biowhat> <where to put data on Triton> <genome> <username on biowhat> <email address>"
 	echo "For help, please contact karmelallison@ucsd.edu"
@@ -30,13 +30,13 @@ fi
 # Get File locations
 DATA_DIR=$TO_DIR/`basename $GET_DIR`
 
-if [ "$CMD" == "send"]; then
+if [ "$CMD" == "send" ]; then
 	echo "Copying ${DATA_DIR} to ${BIOWHAT_USER}@biowhat.ucsd.edu:${GET_DIR}..."
 	scp -r $DATA_DIR/*/*${GENOME}* $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR 
 	exit
 else
-	if [ "$CMD" == "clean"]; then
-		if [ "$DATA_DIR" == ""]; then
+	if [ "$CMD" == "clean" ]; then
+		if [ "$DATA_DIR" == "" ]; then
 			echo "Cannot delete specified directory."
 			exit
 		fi
@@ -52,12 +52,12 @@ else
 		fi
 	else
 		# Set up operation
-		if [ "$CMD" == "tophat"]; then
+		if [ "$CMD" == "tophat" ]; then
 			OP="perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 ${fastq}"
 			WTIME="10:00:00"
 			NODES="nodes=1:ppn=1"
 		else
-			if [ "$CMD" == "bowtie"]; then
+			if [ "$CMD" == "bowtie" ]; then
 				OP="perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 ${fastq}"
 				WTIME="3:00:00"
 				NODES="nodes=1:ppn=8"
