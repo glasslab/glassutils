@@ -20,9 +20,9 @@ if [ "$EMAIL" == "" ]; then
 fi
 
 if [ "$CMD" == "" ] || [ "$CMD" == "help" ]; then
-	echo "Please enter a command: send, clean, tophat, bowtie."
+	echo "Please enter a command: send, clean, tophat, bowtie.\n"
 	curr_file=`basename ${0}`
-	echo "Usage: ${curr_file} <1: send|clean|tophat|bowtie > <2: path to data on biowhat > <3: where to put data on Triton > <4: genome > <5: username on biowhat > <6: email address >"
+	echo "Usage: ${curr_file} <1: send|clean|tophat|bowtie > <2: path to data on biowhat > <3: where to put data on Triton > <4: genome > <5: username on biowhat > <6: email address >\n\n"
 	echo "For help, please contact karmelallison@ucsd.edu"
 	exit
 fi
