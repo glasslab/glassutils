@@ -60,12 +60,12 @@ else
 	else
 		# Set up operation
 		if [ "$CMD" == "tophat" ]; then
-			OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 ${fastq}"
+			OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
 			WTIME="10:00:00"
 			NODES="nodes=1:ppn=1"
 		else
 			if [ "$CMD" == "bowtie" ]; then
-				OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 ${fastq}"
+				OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 "
 				WTIME="3:00:00"
 				NODES="nodes=1:ppn=8"
 			else
@@ -88,6 +88,7 @@ else
 		# Create PBS file for each
 		for fastq in $DATA_DIR/*/*.fastq
 		  do
+			OP_for_file="${OP} ${fastq}"
 			bname_fastq=`basename $fastq`
 			job_file=$DATA_DIR/${bname_fastq}_job_file.sh
 			echo "#!/bin/bash
@@ -104,7 +105,7 @@ else
 
 			cd /phase1/${USER}
 
-			${OP}" > $job_file
+			${OP_for_file}" > $job_file
 
 			qsub $job_file
 		done
