@@ -1,3 +1,5 @@
+#!/bin/bash
+
 CMD=$1
 GET_DIR=$2
 TO_DIR=$3
