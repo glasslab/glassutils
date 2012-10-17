@@ -10,7 +10,14 @@ touch $TEST_PATH
 CMD="find ${BACKUP_PATH}${TEST_PATH} -mtime -1"
 CONFIRM=`ssh admin@nas.glasso.me ${CMD}`
 
-if [ "$CONFIRM" != "${BACKUP_PATH}${TEST_PATH}" ]; then
-	# Nagios alert
-	echo "No"
+if [ "${CONFIRM}" != "${BACKUP_PATH}${TEST_PATH}" ]; then
+	# Nagios alert- critical
+	echo "Did not recognize NAS backup test file.
+Ran command: $CMD
+Found: ${CONFIRM}
+Was looking for: ${BACKUP_PATH}${TEST_PATH}"
+	exit 2
 fi
+
+echo "Found NAS backup test file: ${CONFIRM} == ${BACKUP_PATH}${TEST_PATH}"
+exit 0
