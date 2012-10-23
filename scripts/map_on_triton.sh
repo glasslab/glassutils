@@ -105,7 +105,7 @@ else
 			#PBS -m abe
 			#PBS -A glass-lab
 
-			cd /phase1/${USER}
+			cd /oasis/triton/scratch/${USER}
 
 			${OP_for_file}" > $job_file
 
