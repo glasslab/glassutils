@@ -63,7 +63,7 @@ else
 		# Set up operation
 		if [ "$CMD" == "tophat" ]; then
 			OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
-			WTIME="10:00:00"
+			WTIME="20:00:00"
 			NODES="nodes=1:ppn=1"
 		else
 			if [ "$CMD" == "bowtie" ]; then
