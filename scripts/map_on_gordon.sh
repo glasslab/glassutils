@@ -86,7 +86,7 @@ else
 		fi
 		
 		# Move files over
-		if [ "$GET_DIR" != "local" ]; then
+		if [ "${GET_DIR:0:5}" != "local" ]; then
 			scp -r $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR $TO_DIR 
 		fi
 
