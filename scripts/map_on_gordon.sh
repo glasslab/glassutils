@@ -71,13 +71,21 @@ else
 				WTIME="3:00:00"
 				NODES="nodes=1:ppn=8"
 			else
-				echo "Did not recognize command '${CMD}'. Exiting."
-				exit
+				if [ "$CMD" == "gsnap" ]; then
+					OP="gsnap -d ${GENOME} "
+					WTIME="10:00:00"
+					NODES="nodes=1:ppn=8"
+				else
+					echo "Did not recognize command '${CMD}'. Exiting."
+					exit
+				fi
 			fi
 		fi
 		
 		# Move files over
-		scp -r $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR $TO_DIR 
+		if [ "$GET_DIR" != "local" ]; then
+			scp -r $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR $TO_DIR 
+		fi
 
 
 		# Decompress files, combine.
