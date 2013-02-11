@@ -63,16 +63,19 @@ else
 		# Set up operation
 		if [ "$CMD" == "tophat" ]; then
 			OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
+			DIRECT_OUTPUT=false
 			WTIME="20:00:00"
 			NODES="nodes=1:ppn=1"
 		else
 			if [ "$CMD" == "bowtie" ]; then
 				OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 "
+				DIRECT_OUTPUT=false
 				WTIME="3:00:00"
 				NODES="nodes=1:ppn=8"
 			else
 				if [ "$CMD" == "gsnap" ]; then
-					OP="gsnap -d ${GENOME} "
+					OP="gsnap -d ${GENOME} -A sam "
+					DIRECT_OUTPUT=true
 					WTIME="10:00:00"
 					NODES="nodes=1:ppn=8"
 				else
@@ -99,6 +102,9 @@ else
 		for fastq in $DATA_DIR/*/*.fastq
 		  do
 			OP_for_file="${OP} ${fastq}"
+			if [ $DIRECT_OUTPUT == true ]; then
+				OP_for_file="${OP_for_file} > ${fastq%.fastq}.sam"
+			fi
 			bname_fastq=`basename $fastq`
 			job_file=$DATA_DIR/${bname_fastq}_job_file.sh
 			echo "#!/bin/bash
