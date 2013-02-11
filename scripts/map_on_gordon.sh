@@ -65,19 +65,19 @@ else
 			OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
 			DIRECT_OUTPUT=false
 			WTIME="20:00:00"
-			NODES="nodes=1:ppn=1"
+			NODES="nodes=1:ppn=16:vsmp"
 		else
 			if [ "$CMD" == "bowtie" ]; then
 				OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 "
 				DIRECT_OUTPUT=false
 				WTIME="3:00:00"
-				NODES="nodes=1:ppn=8"
+				NODES="nodes=1:ppn=16:vsmp"
 			else
 				if [ "$CMD" == "gsnap" ]; then
 					OP="gsnap -d ${GENOME} -A sam "
 					DIRECT_OUTPUT=true
 					WTIME="10:00:00"
-					NODES="nodes=1:ppn=8"
+					NODES="nodes=1:ppn=16:vsmp"
 				else
 					echo "Did not recognize command '${CMD}'. Exiting."
 					exit
@@ -107,20 +107,22 @@ else
 			fi
 			bname_fastq=`basename $fastq`
 			job_file=$DATA_DIR/${bname_fastq}_job_file.sh
-			echo "#!/bin/bash
-			#PBS -q vsmp
-			#PBS -N ${bname_fastq}
-			#PBS -l ${NODES}
-			#PBS -l walltime=${WTIME}
-			#PBS -o ${fastq}.torque_output.txt
-			#PBS -e ${fastq}.torque_error.txt
-			#PBS -V
-			#PBS -M ${EMAIL}
-			#PBS -m abe
+# Note that leading whitespace breaks Torque. 
+echo "#!/bin/bash
+#PBS -q vsmp
+#PBS -N ${bname_fastq}
+#PBS -l ${NODES}
+#PBS -l walltime=${WTIME}
+#PBS -o ${fastq}.torque_output.txt
+#PBS -e ${fastq}.torque_error.txt
+#PBS -V
+#PBS -M ${EMAIL}
+#PBS -m abe
+#PBS -A csd178
 
-			cd /oasis/scratch/${USER}/temp_project
+cd /oasis/scratch/${USER}/temp_project
 
-			${OP_for_file}" > $job_file
+${OP_for_file}" > $job_file
 
 			qsub $job_file
 		done
