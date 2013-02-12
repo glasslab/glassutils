@@ -77,7 +77,9 @@ else
 		fi
 		
 		# Move files over
-		scp -r $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR $TO_DIR 
+		if [ "${GET_DIR:0:5}" != "local" ]; then
+			scp -r $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR $TO_DIR 
+		fi
 
 
 		# Decompress files, combine.
@@ -93,21 +95,22 @@ else
 			OP_for_file="${OP} ${fastq}"
 			bname_fastq=`basename $fastq`
 			job_file=$DATA_DIR/${bname_fastq}_job_file.sh
-			echo "#!/bin/bash
-			#PBS -q small
-			#PBS -N ${bname_fastq}
-			#PBS -l ${NODES}
-			#PBS -l walltime=${WTIME}
-			#PBS -o ${fastq}.torque_output.txt
-			#PBS -e ${fastq}.torque_error.txt
-			#PBS -V
-			#PBS -M ${EMAIL}
-			#PBS -m abe
-			#PBS -A glass-lab
+# Note that leading whitespace breaks Torque. 
+echo "#!/bin/bash
+#PBS -q small
+#PBS -N ${bname_fastq}
+#PBS -l ${NODES}
+#PBS -l walltime=${WTIME}
+#PBS -o ${fastq}.torque_output.txt
+#PBS -e ${fastq}.torque_error.txt
+#PBS -V
+#PBS -M ${EMAIL}
+#PBS -m abe
+#PBS -A glass-lab
 
-			cd /oasis/triton/scratch/${USER}
+cd /oasis/triton/scratch/${USER}
 
-			${OP_for_file}" > $job_file
+${OP_for_file}" > $job_file
 
 			qsub $job_file
 		done
