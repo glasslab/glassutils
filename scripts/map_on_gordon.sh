@@ -118,7 +118,7 @@ echo "#!/bin/bash
 #PBS -V
 #PBS -M ${EMAIL}
 #PBS -m abe
-#PBS -A csd178
+#PBS -A csd181
 
 cd /oasis/scratch/${USER}/temp_project
 
