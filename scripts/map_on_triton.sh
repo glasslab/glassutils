@@ -88,15 +88,15 @@ else
             bname=`basename $SUB_DIR`
             
             # If there are any .sra files, dump to .fastq
-            if [ -f *.sra ]; then 
-                for sra in *.sra
+            if [ -f $SUB_DIR/*.sra ]; then 
+                for sra in $SUB_DIR/*.sra
                     do
                         fastq-dump $sra
                         rm $sra
                     done
             fi
             # Make single file, unzipping simultaneously if they are zipped
-            if [ -f *.gz ]; then 
+            if [ -f $SUB_DIR/*.gz ]; then 
                 zcat $SUB_DIR/*.gz > $SUB_DIR/$bname.fastq
             else
                 cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq
