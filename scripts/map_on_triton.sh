@@ -92,7 +92,7 @@ else
                 for sra in $SUB_DIR/*.sra
                     do
                         fastq-dump $sra
-                        rm $sra
+                        #rm $sra
                     done
             fi
             # Make single file, unzipping simultaneously if they are zipped
