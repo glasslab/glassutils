@@ -34,8 +34,9 @@ For help, please see https://sites.google.com/a/glasso.me/glasslab/computational
 fi
 
 
-# Get File locations
-DATA_DIR=$TO_DIR/`basename $GET_DIR`
+# Get File locations, using readlink to get rid of double-slashes,
+# since those break fastq-dump
+DATA_DIR=$(readlink -m $TO_DIR/`basename $GET_DIR`)
 
 if [ "$CMD" == "send" ]; then
     echo "Copying ${DATA_DIR} to ${BIOWHAT_USER}@biowhat.ucsd.edu:${GET_DIR}..."
