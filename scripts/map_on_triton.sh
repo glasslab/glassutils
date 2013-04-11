@@ -93,14 +93,16 @@ else
                 for sra in $SUB_DIR/*.sra
                     do
                         fastq-dump $sra
-                        #rm $sra
+                        rm $sra
                     done
             fi
             # Make single file, unzipping simultaneously if they are zipped
             if [ -f $SUB_DIR/*.gz ]; then 
                 zcat $SUB_DIR/*.gz > $SUB_DIR/$bname.fastq
             else
-                cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq
+                cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq_joined
+                rm $SUB_DIR/*.fastq
+                mv $SUB_DIR/$bname.fastq_joined $SUB_DIR/$bname.fastq
             fi
           done
 
