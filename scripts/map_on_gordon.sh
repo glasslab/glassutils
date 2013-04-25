@@ -97,21 +97,24 @@ else
           do
             bname=`basename $SUB_DIR`
             
-            # If there are any .sra files, dump to .fastq
-            if ls $SUB_DIR/*.sra &> /dev/null; then 
-                for sra in $SUB_DIR/*.sra
-                    do
-                        fastq-dump $sra
-                        rm $sra
-                    done
-            fi
-            # Make single file, unzipping simultaneously if they are zipped
-            if ls $SUB_DIR/*.gz &> /dev/null; then 
-                zcat $SUB_DIR/*.gz > $SUB_DIR/$bname.fastq
-            else
-                cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq_joined
-                rm $SUB_DIR/*.fastq
-                mv $SUB_DIR/$bname.fastq_joined $SUB_DIR/$bname.fastq
+            # If there is exactly one fastq file, use that; otherwise...
+            if [ `ls -l $SUB_DIR/*.fastq | wc -l` -ne 1 ]; then
+                # If there are any .sra files, dump to .fastq
+                if ls $SUB_DIR/*.sra &> /dev/null; then 
+                    for sra in $SUB_DIR/*.sra
+                        do
+                            fastq-dump $sra
+                            rm $sra
+                        done
+                fi
+                # Make single file, unzipping simultaneously if they are zipped
+                if ls $SUB_DIR/*.gz &> /dev/null; then 
+                    zcat $SUB_DIR/*.gz > $SUB_DIR/$bname.fastq
+                else
+                    cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq_joined
+                    rm $SUB_DIR/*.fastq
+                    mv $SUB_DIR/$bname.fastq_joined $SUB_DIR/$bname.fastq
+                fi
             fi
           done
 
