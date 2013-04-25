@@ -65,7 +65,7 @@ else
         if [ "$CMD" == "tophat" ]; then
             OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
             DIRECT_OUTPUT=false
-            WTIME="48:00:00"
+            WTIME="30:00:00"
             NODES="nodes=1:ppn=16:vsmp"
         else
             if [ "$CMD" == "bowtie" ]; then
@@ -135,7 +135,7 @@ echo "#!/bin/bash
 #PBS -V
 #PBS -M ${EMAIL}
 #PBS -m abe
-#PBS -A csd181
+#PBS -A csd178
 
 cd /oasis/scratch/${USER}/temp_project
 
