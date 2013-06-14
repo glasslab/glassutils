@@ -27,9 +27,9 @@ if [ "$CMD" == "" ] || [ "$CMD" == "help" ]; then
     echo "
 Please enter a command: send, clean, tophat, bowtie.
 
-Usage: ${curr_file} <1: tophat|bowtie|send|clean > <2: path to data on biowhat > <3: where to put data on Triton > <4: genome > <5: username on biowhat > <6: email address >
+Usage: ${curr_file} <1: tophat|bowtie|send|clean > <2: path to data on biowhat > <3: where to put data on TSCC > <4: genome > <5: username on biowhat > <6: email address >
 
-For help, please see https://sites.google.com/a/glasso.me/glasslab/computational-guides/using-map_on_triton-sh"
+For help, please see https://sites.google.com/a/glasso.me/glasslab/computational-guides/using-map_on_tscc-sh"
     exit
 fi
 
@@ -128,7 +128,7 @@ echo "#!/bin/bash
 #PBS -m abe
 #PBS -A glass-group
 
-cd /oasis/triton/scratch/${USER}
+cd /oasis/tscc/scratch/${USER}
 
 ${OP_for_file}" > $job_file
 
