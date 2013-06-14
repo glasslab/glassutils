@@ -7,9 +7,9 @@ GENOME=$4
 BIOWHAT_USER=$5
 EMAIL=$6
 
-EXEC_DIR=/projects/glass-lab/bioinformatics
-BOWTIE_INDEXES=/projects/glass-lab/bioinformatics/bowtie2/indexes
-GTF_FILES=/projects/glass-lab/bioinformatics/tophat2/gtf
+EXEC_DIR=/projects/glass-group/bioinformatics
+BOWTIE_INDEXES=/projects/glass-group/bioinformatics/bowtie2/indexes
+GTF_FILES=/projects/glass-group/bioinformatics/tophat2/gtf
 
 if [ "$GENOME" == "" ]; then
     GENOME="mm9"
@@ -126,7 +126,7 @@ echo "#!/bin/bash
 #PBS -V
 #PBS -M ${EMAIL}
 #PBS -m abe
-#PBS -A glass-lab
+#PBS -A glass-group
 
 cd /oasis/triton/scratch/${USER}
 
