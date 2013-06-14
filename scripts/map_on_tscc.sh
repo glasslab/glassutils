@@ -89,7 +89,14 @@ else
             bname=`basename $SUB_DIR`
             
             # If there is exactly one fastq file, use that; otherwise...
-            if [ `ls -l $SUB_DIR/*.fastq | wc -l` -ne 1 ]; then
+            if ls $SUB_DIR/*.fastq &> /dev/null; then
+                if [ `ls -l $SUB_DIR/*.fastq | wc -l` -ne 1 ]; then
+                    cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq_joined
+                    rm $SUB_DIR/*.fastq
+                    mv $SUB_DIR/$bname.fastq_joined $SUB_DIR/$bname.fastq
+                fi
+                # else, only one .fastq; will be used.
+            else
                 # If there are any .sra files, dump to .fastq
                 if ls $SUB_DIR/*.sra &> /dev/null; then 
                     for sra in $SUB_DIR/*.sra
@@ -101,10 +108,6 @@ else
                 # Make single file, unzipping simultaneously if they are zipped
                 if ls $SUB_DIR/*.gz &> /dev/null; then 
                     zcat $SUB_DIR/*.gz > $SUB_DIR/$bname.fastq
-                else
-                    cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq_joined
-                    rm $SUB_DIR/*.fastq
-                    mv $SUB_DIR/$bname.fastq_joined $SUB_DIR/$bname.fastq
                 fi
             fi
           done
