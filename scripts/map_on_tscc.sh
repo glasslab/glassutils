@@ -101,19 +101,19 @@ else
                 if ls $SUB_DIR/*.sra &> /dev/null; then 
                     for sra in $SUB_DIR/*.sra
                         do
-							CURR_DIR=`pwd`
-							# CD in so that fastq-dump works correctly
-				            cd $SUB_DIR
+                            CURR_DIR=`pwd`
+                            # CD in so that fastq-dump works correctly
+                            cd $SUB_DIR
                             fastq-dump $sra
                             rm $sra
                             cd $CURR_DIR
                         done
-					# Then compile all the .fastq
-					if [ `ls -l $SUB_DIR/*.fastq | wc -l` -ne 1 ]; then
-	                    cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq_joined
-	                    rm $SUB_DIR/*.fastq
-	                    mv $SUB_DIR/$bname.fastq_joined $SUB_DIR/$bname.fastq
-	                fi
+                    # Then compile all the .fastq
+                    if [ `ls -l $SUB_DIR/*.fastq | wc -l` -ne 1 ]; then
+                        cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq_joined
+                        rm $SUB_DIR/*.fastq
+                        mv $SUB_DIR/$bname.fastq_joined $SUB_DIR/$bname.fastq
+                    fi
                 fi
                 # Make single file, unzipping simultaneously if they are zipped
                 if ls $SUB_DIR/*.gz &> /dev/null; then 
