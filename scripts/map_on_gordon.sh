@@ -122,6 +122,9 @@ else
                         cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq_joined
                         rm $SUB_DIR/*.fastq
                         mv $SUB_DIR/$bname.fastq_joined $SUB_DIR/$bname.fastq
+                    else
+                        # Rename singular dumped sra file
+                        mv $SUB_DIR/*.fastq $SUB_DIR/$bname.fastq
                     fi
                 fi
                 # Make single file, unzipping simultaneously if they are zipped
