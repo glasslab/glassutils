@@ -145,7 +145,7 @@ else
             job_file=$DATA_DIR/${bname_fastq}_job_file.sh
 # Note that leading whitespace breaks Torque. 
 echo "#!/bin/bash
-#PBS -q vsmp
+#PBS -q normal
 #PBS -N ${bname_fastq}
 #PBS -l ${NODES}
 #PBS -l walltime=${WTIME}
