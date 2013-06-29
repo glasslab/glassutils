@@ -136,8 +136,8 @@ else
 
         # Create PBS file for each
         for fastq in $DATA_DIR/*/*.fastq
-          echo $fastq
           do
+			echo $fastq
             OP_for_file="${OP} ${fastq}"
             if [ $DIRECT_OUTPUT == true ]; then
                 OP_for_file="${OP_for_file} > ${fastq%.fastq}.sam"
