@@ -108,15 +108,15 @@ else
             else
                 # If there are any .sra files, dump to .fastq
                 if ls $SUB_DIR/*.sra &> /dev/null; then 
-	                CURR_DIR=`pwd`
-                    # CD in so that fastq-dump works correctly
-                    cd $SUB_DIR
-                    for sra in *.sra
-                        do                           
+                    for sra in $SUB_DIR/*.sra
+                        do
+                            CURR_DIR=`pwd`
+                            # CD in so that fastq-dump works correctly
+                            cd $SUB_DIR
                             fastq-dump $sra
                             rm $sra
+                            cd $CURR_DIR
                         done
-                    cd $CURR_DIR
                     # Then compile all the .fastq
                     if [ `ls -l $SUB_DIR/*.fastq | wc -l` -ne 1 ]; then
                         cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq_joined
@@ -137,13 +137,11 @@ else
         # Create PBS file for each
         for fastq in $DATA_DIR/*/*.fastq
           do
-			echo $fastq
             OP_for_file="${OP} ${fastq}"
             if [ $DIRECT_OUTPUT == true ]; then
                 OP_for_file="${OP_for_file} > ${fastq%.fastq}.sam"
             fi
             bname_fastq=`basename $fastq`
-            echo $bname_fastq
             job_file=$DATA_DIR/${bname_fastq}_job_file.sh
 # Note that leading whitespace breaks Torque. 
 echo "#!/bin/bash
@@ -162,7 +160,7 @@ cd /oasis/scratch/${USER}/temp_project
 
 ${OP_for_file}" > $job_file
 
-            #qsub $job_file
+            qsub $job_file
         done
         exit
     fi
