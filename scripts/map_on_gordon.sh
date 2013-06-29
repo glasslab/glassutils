@@ -37,7 +37,8 @@ fi
 # Get File locations, using readlink to get rid of double-slashes,
 # since those break fastq-dump
 DATA_DIR=$(readlink -m $TO_DIR/`basename $GET_DIR`)
-
+echo $DATA_DIR
+exit
 if [ "$CMD" == "send" ]; then
     echo "Copying ${DATA_DIR} to ${BIOWHAT_USER}@biowhat.ucsd.edu:${GET_DIR}..."
     mkdir $DATA_DIR/processed
