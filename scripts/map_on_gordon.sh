@@ -37,8 +37,7 @@ fi
 # Get File locations, using readlink to get rid of double-slashes,
 # since those break fastq-dump
 DATA_DIR=$(readlink -m $TO_DIR/`basename $GET_DIR`)
-echo $DATA_DIR
-exit
+
 if [ "$CMD" == "send" ]; then
     echo "Copying ${DATA_DIR} to ${BIOWHAT_USER}@biowhat.ucsd.edu:${GET_DIR}..."
     mkdir $DATA_DIR/processed
@@ -137,12 +136,14 @@ else
 
         # Create PBS file for each
         for fastq in $DATA_DIR/*/*.fastq
+          echo $fastq
           do
             OP_for_file="${OP} ${fastq}"
             if [ $DIRECT_OUTPUT == true ]; then
                 OP_for_file="${OP_for_file} > ${fastq%.fastq}.sam"
             fi
             bname_fastq=`basename $fastq`
+            echo $bname_fastq
             job_file=$DATA_DIR/${bname_fastq}_job_file.sh
 # Note that leading whitespace breaks Torque. 
 echo "#!/bin/bash
@@ -161,7 +162,7 @@ cd /oasis/scratch/${USER}/temp_project
 
 ${OP_for_file}" > $job_file
 
-            qsub $job_file
+            #qsub $job_file
         done
         exit
     fi
