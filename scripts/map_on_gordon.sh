@@ -108,15 +108,15 @@ else
             else
                 # If there are any .sra files, dump to .fastq
                 if ls $SUB_DIR/*.sra &> /dev/null; then 
-                    for sra in $SUB_DIR/*.sra
-                        do
-                            CURR_DIR=`pwd`
-                            # CD in so that fastq-dump works correctly
-                            cd $SUB_DIR
+	                CURR_DIR=`pwd`
+                    # CD in so that fastq-dump works correctly
+                    cd $SUB_DIR
+                    for sra in *.sra
+                        do                           
                             fastq-dump $sra
                             rm $sra
-                            cd $CURR_DIR
                         done
+                    cd $CURR_DIR
                     # Then compile all the .fastq
                     if [ `ls -l $SUB_DIR/*.fastq | wc -l` -ne 1 ]; then
                         cat $SUB_DIR/*.fastq > $SUB_DIR/$bname.fastq_joined
