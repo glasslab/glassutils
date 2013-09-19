@@ -63,7 +63,7 @@ else
     else
         # Set up operation
         if [ "$CMD" == "tophat" ]; then
-            OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
+            OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 16 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
             DIRECT_OUTPUT=false
             WTIME="30:00:00"
         else
