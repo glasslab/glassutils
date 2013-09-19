@@ -68,7 +68,7 @@ else
             WTIME="30:00:00"
         else
             if [ "$CMD" == "bowtie" ]; then
-                OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 "
+                OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 16 "
                 DIRECT_OUTPUT=false
                 WTIME="3:00:00"
             else
