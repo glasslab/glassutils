@@ -66,19 +66,16 @@ else
             OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 1 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
             DIRECT_OUTPUT=false
             WTIME="30:00:00"
-            NODES="nodes=1:ppn=16:vsmp"
         else
             if [ "$CMD" == "bowtie" ]; then
                 OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 "
                 DIRECT_OUTPUT=false
                 WTIME="3:00:00"
-                NODES="nodes=1:ppn=16:vsmp"
             else
                 if [ "$CMD" == "gsnap" ]; then
                     OP="gsnap -d ${GENOME} -A sam "
                     DIRECT_OUTPUT=true
                     WTIME="10:00:00"
-                    NODES="nodes=1:ppn=16:vsmp"
                 else
                     echo "Did not recognize command '${CMD}'. Exiting."
                     exit
@@ -147,7 +144,7 @@ else
 echo "#!/bin/bash
 #PBS -q normal
 #PBS -N ${bname_fastq}
-#PBS -l ${NODES}
+#PBS -l nodes=1:ppn=16:native
 #PBS -l walltime=${WTIME}
 #PBS -o ${fastq}.torque_output.txt
 #PBS -e ${fastq}.torque_error.txt
