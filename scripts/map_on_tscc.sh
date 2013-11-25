@@ -7,7 +7,7 @@ GENOME=$4
 BIOWHAT_USER=$5
 EMAIL=$6
 
-EXEC_DIR=/projects/glass-group/bioinformatics
+EXEC_DIR=../mapping_scripts
 BOWTIE_INDEXES=/projects/glass-group/bioinformatics/bowtie2/indexes
 GTF_FILES=/projects/glass-group/bioinformatics/tophat2/gtf
 
@@ -63,12 +63,12 @@ else
     else
         # Set up operation
         if [ "$CMD" == "tophat" ]; then
-            OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
+            OP="perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
             WTIME="40:00:00"
             NODES="nodes=1:ppn=8"
         else
             if [ "$CMD" == "bowtie" ]; then
-                OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 "
+                OP="perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 8 "
                 WTIME="3:00:00"
                 NODES="nodes=1:ppn=8"
             else
