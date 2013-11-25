@@ -7,7 +7,7 @@ GENOME=$4
 BIOWHAT_USER=$5
 EMAIL=$6
 
-EXEC_DIR=../mapping_scripts
+EXEC_DIR=/projects/glass-group/glassutils/glassutils/mapping_scripts
 BOWTIE_INDEXES=/projects/ps-glasslab/bioinformatics/software/bowtie2/indexes
 GTF_FILES=/projects/ps-glasslab/bioinformatics/software/tophat2/gtf
 
