@@ -8,8 +8,8 @@ BIOWHAT_USER=$5
 EMAIL=$6
 
 EXEC_DIR=../mapping_scripts
-BOWTIE_INDEXES=/projects/glass-group/bioinformatics/bowtie2/indexes
-GTF_FILES=/projects/glass-group/bioinformatics/tophat2/gtf
+BOWTIE_INDEXES=/projects/ps-glasslab/bioinformatics/software/bowtie2/indexes
+GTF_FILES=/projects/ps-glasslab/bioinformatics/software/tophat2/gtf
 
 if [ "$GENOME" == "" ]; then
     GENOME="mm9"
@@ -27,7 +27,7 @@ if [ "$CMD" == "" ] || [ "$CMD" == "help" ]; then
     echo "
 Please enter a command: send, clean, tophat, bowtie.
 
-Usage: ${curr_file} <1: tophat|bowtie|send|clean > <2: path to data on biowhat > <3: where to put data on TSCC > <4: genome > <5: username on biowhat > <6: email address >
+Usage: ${curr_file} <1: tophat|bowtie|send|clean > <2: path to data on glassome > <3: where to put data on TSCC > <4: genome > <5: username on glassome > <6: email address >
 
 For help, please see https://sites.google.com/a/glasso.me/glasslab/computational-guides/using-map_on_tscc-sh"
     exit
@@ -39,10 +39,10 @@ fi
 DATA_DIR=$(readlink -m $TO_DIR/`basename $GET_DIR`)
 
 if [ "$CMD" == "send" ]; then
-    echo "Copying ${DATA_DIR} to ${BIOWHAT_USER}@biowhat.ucsd.edu:${GET_DIR}..."
+    echo "Copying ${DATA_DIR} to ${BIOWHAT_USER}@glassome.ucsd.edu:${GET_DIR}..."
     mkdir $DATA_DIR/processed
     mv $DATA_DIR/*/*${GENOME}* $DATA_DIR/processed
-    scp -r $DATA_DIR/processed $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR 
+    cp -r $DATA_DIR/processed /projects/ps-glasslab/$GET_DIR 
     exit
 else
     if [ "$CMD" == "clean" ]; then
@@ -72,14 +72,19 @@ else
                 WTIME="3:00:00"
                 NODES="nodes=1:ppn=8"
             else
-                echo "Did not recognize command '${CMD}'. Exiting."
-                exit
+		if [ "$CMD" == "STAR" ]; then
+			OP="perl ${EXEC_DIR}/map-star.pl ${GENOME} "
+			WTIME="3:00:00"
+			NODES="nodes=1:ppn=8"
+		else
+			echo "Did not recognize command '${CMD}'. Exiting."
+			exit
+		fi
             fi
-        fi
-        
+        fi        
         # Move files over
         if [ "${GET_DIR:0:5}" != "local" ]; then
-            scp -r $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR $TO_DIR 
+            cp -r /projects/ps-glasslab/$GET_DIR $TO_DIR 
         fi
 
 
@@ -131,6 +136,14 @@ else
             OP_for_file="${OP} ${fastq}"
             bname_fastq=`basename $fastq`
             job_file=$DATA_DIR/${bname_fastq}_job_file.sh
+	    echo $job_file
+
+if [ "$CMD" == "STAR" ]; then
+	new_dir=`dirname $fastq`
+else
+	new_dir="/oasis/tscc/scratch/${USER}"
+fi
+
 # Note that leading whitespace breaks Torque. 
 echo "#!/bin/bash
 #PBS -q hotel
@@ -144,7 +157,7 @@ echo "#!/bin/bash
 #PBS -m abe
 #PBS -A glass-group
 
-cd /oasis/tscc/scratch/${USER}
+cd $new_dir
 
 ${OP_for_file}" > $job_file
 
