@@ -4,18 +4,18 @@ CMD=$1
 GET_DIR=$2
 TO_DIR=$3
 GENOME=$4
-BIOWHAT_USER=$5
+GLASSOME_USER=$5
 EMAIL=$6
 
-EXEC_DIR=/home/karmel/software
+EXEC_DIR=/home/karmel/software/glassutils/glassutils/mapping_scripts
 BOWTIE_INDEXES=/home/karmel/software/bowtie2/indexes
 GTF_FILES=/home/karmel/software/tophat/gtf
 
 if [ "$GENOME" == "" ]; then
     GENOME="mm9"
 fi
-if [ "$BIOWHAT_USER" == "" ]; then
-    BIOWHAT_USER="$USER"
+if [ "$GLASSOME_USER" == "" ]; then
+    GLASSOME_USER="$USER"
 fi
 if [ "$EMAIL" == "" ]; then
     EMAIL="$USER@ucsd.edu"
@@ -27,7 +27,7 @@ if [ "$CMD" == "" ] || [ "$CMD" == "help" ]; then
     echo "
 Please enter a command: send, clean, tophat, bowtie.
 
-Usage: ${curr_file} <1: tophat|bowtie|send|clean > <2: path to data on biowhat > <3: where to put data on Triton > <4: genome > <5: username on biowhat > <6: email address >
+Usage: ${curr_file} <1: tophat|bowtie|send|clean > <2: path to data on glassome > <3: where to put data on Triton > <4: genome > <5: username on glassome > <6: email address >
 
 For help, please see https://sites.google.com/a/glasso.me/glasslab/computational-guides/using-map_on_triton-sh"
     exit
@@ -39,10 +39,10 @@ fi
 DATA_DIR=$(readlink -m $TO_DIR/`basename $GET_DIR`)
 
 if [ "$CMD" == "send" ]; then
-    echo "Copying ${DATA_DIR} to ${BIOWHAT_USER}@biowhat.ucsd.edu:${GET_DIR}..."
+    echo "Copying ${DATA_DIR} to ${GLASSOME_USER}@glassome.ucsd.edu:${GET_DIR}..."
     mkdir $DATA_DIR/processed
     mv $DATA_DIR/*/*${GENOME}* $DATA_DIR/processed
-    scp -r $DATA_DIR/processed $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR 
+    scp -r $DATA_DIR/processed $GLASSOME_USER@glassome.ucsd.edu:$GET_DIR 
     exit
 else
     if [ "$CMD" == "clean" ]; then
@@ -63,29 +63,27 @@ else
     else
         # Set up operation
         if [ "$CMD" == "tophat" ]; then
-            OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 16 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
-            DIRECT_OUTPUT=false
+            OP="perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 16 --library-type fr-secondstrand -G ${GTF_FILES}/${GENOME}.refseq.gtf -tophat2 "
             WTIME="30:00:00"
         else
             if [ "$CMD" == "bowtie" ]; then
-                OP="perl ${EXEC_DIR}/misc/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 16 "
-                DIRECT_OUTPUT=false
+                OP="perl ${EXEC_DIR}/map-bowtie2.pl -index ${BOWTIE_INDEXES}/${GENOME} -cpu 1 -p 16 "
                 WTIME="3:00:00"
             else
-                if [ "$CMD" == "gsnap" ]; then
-                    OP="gsnap -d ${GENOME} -A sam "
-                    DIRECT_OUTPUT=true
-                    WTIME="10:00:00"
-                else
-                    echo "Did not recognize command '${CMD}'. Exiting."
-                    exit
-                fi
+		if [ "$CMD" == "STAR" ]; then
+			OP="perl ${EXEC_DIR}/map-star.pl ${GENOME} "
+			WTIME="3:00:00"
+			NODES="nodes=1:ppn=8"
+		else
+			echo "Did not recognize command '${CMD}'. Exiting."
+			exit
+		fi
             fi
         fi
         
         # Move files over
         if [ "${GET_DIR:0:5}" != "local" ]; then
-            scp -r $BIOWHAT_USER@biowhat.ucsd.edu:$GET_DIR $TO_DIR 
+            scp -r $GLASSOME_USER@glassome.ucsd.edu:$GET_DIR $TO_DIR 
         fi
 
 
@@ -135,11 +133,16 @@ else
         for fastq in $DATA_DIR/*/*.fastq
           do
             OP_for_file="${OP} ${fastq}"
-            if [ $DIRECT_OUTPUT == true ]; then
-                OP_for_file="${OP_for_file} > ${fastq%.fastq}.sam"
-            fi
             bname_fastq=`basename $fastq`
             job_file=$DATA_DIR/${bname_fastq}_job_file.sh
+	    echo $job_file
+
+if [ "$CMD" == "STAR" ]; then
+	new_dir=`dirname $fastq`
+else
+	new_dir="/oasis/tscc/scratch/${USER}"
+fi
+
 # Note that leading whitespace breaks Torque. 
 echo "#!/bin/bash
 #PBS -q normal

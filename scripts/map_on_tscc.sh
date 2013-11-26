@@ -4,7 +4,7 @@ CMD=$1
 GET_DIR=$2
 TO_DIR=$3
 GENOME=$4
-BIOWHAT_USER=$5
+GLASSOME_USER=$5
 EMAIL=$6
 
 EXEC_DIR=/projects/glass-group/glassutils/glassutils/mapping_scripts
@@ -14,8 +14,8 @@ GTF_FILES=/projects/ps-glasslab/bioinformatics/software/tophat2/gtf
 if [ "$GENOME" == "" ]; then
     GENOME="mm9"
 fi
-if [ "$BIOWHAT_USER" == "" ]; then
-    BIOWHAT_USER="$USER"
+if [ "$GLASSOME_USER" == "" ]; then
+    GLASSOME_USER="$USER"
 fi
 if [ "$EMAIL" == "" ]; then
     EMAIL="$USER@ucsd.edu"
@@ -39,7 +39,7 @@ fi
 DATA_DIR=$(readlink -m $TO_DIR/`basename $GET_DIR`)
 
 if [ "$CMD" == "send" ]; then
-    echo "Copying ${DATA_DIR} to ${BIOWHAT_USER}@glassome.ucsd.edu:${GET_DIR}..."
+    echo "Copying ${DATA_DIR} to ${GLASSOME_USER}@glassome.ucsd.edu:${GET_DIR}..."
     mkdir $DATA_DIR/processed
     mv $DATA_DIR/*/*${GENOME}* $DATA_DIR/processed
     cp -r $DATA_DIR/processed /projects/ps-glasslab/$GET_DIR 
