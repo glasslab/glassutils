@@ -25,9 +25,9 @@ if [ "$CMD" == "" ] || [ "$CMD" == "help" ]; then
     curr_file=`basename ${0}`
     
     echo "
-Please enter a command: send, clean, tophat, bowtie.
+Please enter a command: send, clean, tophat, bowtie, STAR.
 
-Usage: ${curr_file} <1: tophat|bowtie|send|clean > <2: path to data on glassome > <3: where to put data on TSCC > <4: genome > <5: username on glassome > <6: email address >
+Usage: ${curr_file} <1: tophat|bowtie|STAR|send|clean > <2: path to data on glassome > <3: where to put data on TSCC > <4: genome > <5: username on glassome > <6: email address >
 
 For help, please see https://sites.google.com/a/glasso.me/glasslab/computational-guides/using-map_on_tscc-sh"
     exit
