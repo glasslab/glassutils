@@ -42,6 +42,8 @@ if [ "$CMD" == "send" ]; then
     echo "Copying ${DATA_DIR} to ${GLASSOME_USER}@glassome.ucsd.edu:${GET_DIR}..."
     mkdir $DATA_DIR/processed
     mv $DATA_DIR/*/*${GENOME}* $DATA_DIR/processed
+    # For RNA-STAR log:
+    mv $DATA_DIR/*/Log.final* $DATA_DIR/processed
     cp -r $DATA_DIR/processed /projects/ps-glasslab/$GET_DIR 
     exit
 else
