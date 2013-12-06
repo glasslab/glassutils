@@ -43,7 +43,9 @@ if [ "$CMD" == "send" ]; then
     mkdir $DATA_DIR/processed
     mv $DATA_DIR/*/*${GENOME}* $DATA_DIR/processed
     # For RNA-STAR log:
-    mv $DATA_DIR/*/Log.final* $DATA_DIR/processed
+    if ls $DATA_DIR/*/Log.final* &> /dev/null; then 
+        mv $DATA_DIR/*/Log.final* $DATA_DIR/processed
+    fi
     cp -r $DATA_DIR/processed /projects/ps-glasslab/$GET_DIR 
     exit
 else
