@@ -7,7 +7,7 @@ email=$3
 
 if [ "$#" -ne 3 ]; then
 	echo "Illegal number of parameters"
-	echo "create_tagDir.sh <directory that contains sam/bam files> <outputDirectory> <email>"
+	echo "calculatePileups.sh <directory that contains sam/bam files> <outputDirectory> <email>"
 	exit 1
 fi
 
@@ -44,7 +44,7 @@ find $inputDir -name '*.sam' | while read samFile; do
 #PBS -A glass-group
 $command" > $outputDir/${sampleName}.torque.sh
 
-#qsub $outputDir/${samFile}.torque.sh
+qsub $outputDir/${sampleName}.torque.sh
 done
 
 
@@ -75,5 +75,5 @@ find $inputDir -name '*.bam' | while read bamFile; do
 #PBS -A glass-group
 $command" > $outputDir/${sampleName}.torque.sh
 
-#qsub $outputDir/${bamFile}.torque.sh
+qsub $outputDir/${sampleName}.torque.sh
 done
