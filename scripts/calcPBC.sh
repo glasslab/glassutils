@@ -9,35 +9,10 @@ if [ "$#" -ne 1 ]; then
 	exit 1
 fi
 
-find $inputDir -name '*.sam' | while read samFile; do
-	echo $samFile
-	sampleName=${samFile%%.*sam}
-	command=""
-	if [ "$dataType" = "chip" ]
-	then
-		command="makeTagDirectory $sampleName -genome $genome -checkGC $samFile -format sam"
-
-	elif [ "$dataType" = "rna" ]
-	then
-		command="makeTagDirectory $sampleName -genome $genome -checkGC $samFile -format sam -flip"
-	fi
-	# move tag directory to $input/tagDirs
-	command="$command;mv $sampleName/ $inputDir/tagDirs/"
-
-	echo "submitting $command"
-	# create qsub file
-	echo "#!/bin/bash
-#PBS -q hotel
-#PBS -N $sampleName
-#PBS -l nodes=1:ppn=8
-#PBS -l walltime=3:00:00
-#PBS -o ${sampleName}_torque_output.txt
-#PBS -e ${sampleName}_torque_error.txt
-#PBS -V
-#PBS -M $email
-#PBS -m abe
-#PBS -A glass-group
-$command" > ${sampleName}.torque.sh
-
-qsub ${sampleName}.torque.sh
+find $inputDir -name '*.pileup' | while read pileupFile; do
+	echo $pileupFile
+	sampleName=${pileupFile%.pileup}
+	sampleName=${pileupFile##*/}
+	PBC=$(awk 'BEGIN {N1=0;ND=0} {if($4==1){N1+=1} ND+=1} END{print N1/ND}' $pileupFile)
+	echo -e '$sampleName\t$PBC'
 done
