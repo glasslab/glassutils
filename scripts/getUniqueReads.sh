@@ -1,12 +1,13 @@
 #! /bin/bash
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
         echo "Illegal number of parameters"
-        echo "filterToBam.sh <directory containing directories that contain sam/bam files> <output output directory>"
+        echo "filterToBam.sh <directory containing directories that contain sam/bam files> <output output directory> <email>"
         exit 1
 fi
 
 inputDir=$1
 outputDir=$2
+email=$3
 
 # make output directory if it doesn't exist
 if [ ! -d $outputDir ]
@@ -37,7 +38,6 @@ find $inputDir -name '*.sam' | while read samFile; do
 $command" > $outputDir/${sampleName}.torque.sh
 
 qsub $outputDir/${sampleName}.torque.sh
-done
 
 done
 
@@ -63,6 +63,5 @@ find $inputDir -name '*.bam' | while read bamFile; do
 $command" > $outputDir/${sampleName}.torque.sh
 
 qsub $outputDir/${sampleName}.torque.sh
-done
 
 done
