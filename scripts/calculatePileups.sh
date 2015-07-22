@@ -66,7 +66,7 @@ find $inputDir -name '*.bam' | while read bamFile; do
 #PBS -q hotel
 #PBS -N $sampleName
 #PBS -l nodes=1:ppn=8
-#PBS -l walltime=3:00:00
+#PBS -l walltime=1:00:00
 #PBS -o ${sampleName}_torque_output.txt
 #PBS -e ${sampleName}_torque_error.txt
 #PBS -V
