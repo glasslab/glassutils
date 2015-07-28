@@ -10,7 +10,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 find $inputDir -name '*.pileup' | while read pileupFile; do
-	sampleName=${pileupFile%.pileup}
+	sampleName=${pileupFile%%.*}
 	sampleName=${sampleName##*/}
 	PBC=$(awk 'BEGIN {N1=0;ND=0} {if($4==1){N1+=1} ND+=1} END{print N1/ND}' ${pileupFile})
 	echo -e "$sampleName\t$PBC"
