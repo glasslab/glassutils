@@ -7,12 +7,12 @@ GENOME=$4
 GLASSOME_USER=$5
 EMAIL=$6
 
-EXEC_DIR=/projects/glass-group/glassutils/glassutils/mapping_scripts
+EXEC_DIR=/projects/ps-glasslab-bioinformatics/glassutils/mapping_scripts
 BOWTIE_INDEXES=/projects/ps-glasslab/bioinformatics/software/bowtie2/indexes
 GTF_FILES=/projects/ps-glasslab/bioinformatics/software/tophat2/gtf
 
 if [ "$GENOME" == "" ]; then
-    GENOME="mm9"
+    GENOME="mm10"
 fi
 if [ "$GLASSOME_USER" == "" ]; then
     GLASSOME_USER="$USER"
