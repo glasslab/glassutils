@@ -46,7 +46,8 @@ if [ "$CMD" == "send" ]; then
     if ls $DATA_DIR/*/Log.final* &> /dev/null; then 
         mv $DATA_DIR/*/Log.final* $DATA_DIR/processed
     fi
-    cp -r $DATA_DIR/processed /projects/ps-glasslab/$GET_DIR 
+    #cp -r $DATA_DIR/processed /projects/ps-glasslab/$GET_DIR 
+    cp -r $DATA_DIR/processed /projects/ps-glasslab-data/${GET_DIR/data//} 
     exit
 else
     if [ "$CMD" == "clean" ]; then
