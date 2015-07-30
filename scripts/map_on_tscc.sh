@@ -88,7 +88,9 @@ else
         fi        
         # Move files over
         if [ "${GET_DIR:0:5}" != "local" ]; then
-            cp -r /projects/ps-glasslab/$GET_DIR $TO_DIR 
+            #cp -r /projects/ps-glasslab/$GET_DIR $TO_DIR 
+            cp -r /projects/ps-glasslab-data/${GET_DIR/data//} $TO_DIR 
+
         fi
 
 
