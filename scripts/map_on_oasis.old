@@ -6,7 +6,7 @@ TO_DIR=$2
 GENOME=$3
 EMAIL=$4
 
-EXEC_DIR=/projects/glass-glasslab-bioinformatics/glassutils/mapping_scripts
+EXEC_DIR=/projects/ps-glasslab-bioinformatics/glassutils/mapping_scripts
 BOWTIE_INDEXES=/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes
 GTF_FILES=/projects/ps-glasslab/bioinformatics/software/tophat2/gtf
 
