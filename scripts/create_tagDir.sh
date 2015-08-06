@@ -33,20 +33,22 @@ find $inputDir -name '*.sam' | while read samFile; do
 	# move tag directory to $input/tagDirs
 	command="$command;mv $sampleName/ $inputDir/tagDirs/"
 
+	jobName=${sampleName##*/}
 	echo "submitting $command"
 	# create qsub file
 	echo "#!/bin/bash
 #PBS -q hotel
-#PBS -N $sampleName
+#PBS -N tagDir_$jobName
 #PBS -l nodes=1:ppn=8
 #PBS -l walltime=3:00:00
-#PBS -o ${sampleName}_torque_output.txt
-#PBS -e ${sampleName}_torque_error.txt
+#PBS -o $inputDir/tagDirs/${jobName}_torque_output.txt
+#PBS -e $inputDir/tagDirs/${jobName}_torque_error.txt
 #PBS -V
 #PBS -M $email
 #PBS -m abe
 #PBS -A glass-group
-$command" > ${sampleName}.torque.sh
+$command" > $inputDir/tagDirs/${jobName}.torque.sh
 
-qsub ${sampleName}.torque.sh
+qsub $inputDir/tagDirs/${jobName}.torque.sh
+
 done
