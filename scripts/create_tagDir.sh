@@ -40,7 +40,7 @@ find $inputDir -name '*.sam' | while read samFile; do
 #PBS -q hotel
 #PBS -N tagDir_$jobName
 #PBS -l nodes=1:ppn=8
-#PBS -l walltime=3:00:00
+#PBS -l walltime=1:00:00
 #PBS -o $inputDir/tagDirs/${jobName}_torque_output.txt
 #PBS -e $inputDir/tagDirs/${jobName}_torque_error.txt
 #PBS -V
