@@ -8,8 +8,8 @@ GLASSOME_USER=$5
 EMAIL=$6
 
 EXEC_DIR=/projects/ps-glasslab-bioinformatics/glassutils/mapping_scripts
-BOWTIE_INDEXES=/projects/ps-glasslab/bioinformatics/software/bowtie2/indexes
-GTF_FILES=/projects/ps-glasslab/bioinformatics/software/tophat2/gtf
+BOWTIE_INDEXES=/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes
+GTF_FILES=/projects/ps-glasslab-bioinformatics/software/tophat2/gtf
 
 if [ "$GENOME" == "" ]; then
     GENOME="mm10"
