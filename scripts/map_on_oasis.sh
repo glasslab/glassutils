@@ -34,7 +34,7 @@ glassome_path='/projects/ps-glasslab-data/'
 mappingScripts_path='/projects/ps-glasslab-bioinformatics/glassutils/mapping_scripts/'
 bowtie_index_path='/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes/'
 star_path='/projects/ps-glasslab-bioinformatics/software/STAR/'
-bowtie_path='/projects/ps-glasslab-bioinformatics/software/bowtie2/'
+bowtie_path='/projects/glass-group/bioinformatics/bowtie2'
 
 # check number of arguments
 if [ $# -ne 4 ] 
@@ -123,25 +123,25 @@ fi
 if ! [[ $inputDirectory == "/oasis/tscc/scratch/*" ]]
 then
     outputDirectory="/oasis/tscc/scratch/$USER/${inputDirectory##*/}"
-#    if [ -d $outputDirectory ]
-#    then
-#        read -p "$outputDirectory already exists! Would you like to delete it\
-# [yY]?" -n 1 r
-#        echo
-#        if [[ $REPLY =~ ^[Yy]$ ]]
-#        then
-#            echo "removing $outputDirectory"
-#            rm -rf $outputDirectory
-#            echo "Copying files from $inputDirectory to $outputDirectory"
-#            scp -r $inputDirectory $outputDirectory
-#        else
-#            echo "Copying files from $inputDirectory to $outputDirectory"
-#            scp -r $inputDirectory /oasis/tscc/scratch/$USER/
-#        fi
-#    else
-#        echo "Copying files from $inputDirectory to $outputDirectory"
-#        scp -r $inputDirectory $outputDirectory
-#    fi
+    if [ -d $outputDirectory ]
+    then
+        read -p "$outputDirectory already exists! Would you like to delete it\
+ [yY]?" -n 1 r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]
+        then
+            echo "removing $outputDirectory"
+            rm -rf $outputDirectory
+            echo "Copying files from $inputDirectory to $outputDirectory"
+            scp -r $inputDirectory $outputDirectory
+        else
+            echo "Copying files from $inputDirectory to $outputDirectory"
+            scp -r $inputDirectory /oasis/tscc/scratch/$USER/
+        fi
+    else
+        echo "Copying files from $inputDirectory to $outputDirectory"
+        scp -r $inputDirectory $outputDirectory
+    fi
 else
     outputDirectory=$inputDirectory
 fi
@@ -216,21 +216,35 @@ if [ ! -d $outputDirectory/qsub_scripts ]
 then
     mkdir $outputDirectory/qsub_scripts
 fi
+rm $outputDirectory/qsub_scripts/*
 
 # make directory for sam files
-if [ ! -d $outputDirectory/sam_files]
+if [ ! -d $outputDirectory/sam_files ]
 then
     mkdir $outputDirectory/sam_files
 fi
 
+# make directory for tag directories
+if [ ! -d $outputDirectory/tag_directories ]
+then
+    mkdir $outputDirectory/tag_directories
+fi
+
 # make directory for log files
-if [ ! -d $outputDirectory/log_files]
+if [ ! -d $outputDirectory/log_files ]
 then
     mkdir $outputDirectory/log_files
 fi
 
+# make scratch directory for pbc calculation
+if [ ! -d $outputDirectory/pbc ]
+then
+    mkdir $outputDirectory/pbc
+fi
+
 # generate a UUID for this set of jobs
 uuid=$[ 1 + $[ RANDOM % 10000 ]] # generate a random number between 0 and 10000
+uuid=${USER}_${uuid}
 
 # find directory where script is located
 codebase=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) 
@@ -239,41 +253,39 @@ codebase=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # find all fastq files
 fastqPaths=( $(find $outputDirectory -path *fastq -type f) )
-if [ $experimentType == "chip" ]
-then
-    for fastqFile in ${fastqPaths[*]} 
-        do
-        currentDirectory=${fastqFile%/*fastq}
-        sampleName=${fastqFile%/.fastq}
-        sampleName=${sampleName##/*/}
+for fastqFile in ${fastqPaths[*]} 
+    do
+    currentDirectory=${fastqFile%/*fastq}
+    sampleName=${fastqFile%.fastq}
+    sampleName=${sampleName##/*/}
+    samName=""
+    logName=""
 
-done
+    # map file
+    if [ $experimentType == "chip" ]
+    then
+        samName="${sampleName}.bowtie2.sam" # change extenseion to sam
+        logName="${sampleName}.bowtie2.log" # remove path preceding file name
 
-#my $outputFile = "$file1.$genomeName.bowtie2.sam";
-#my $logFile = "$file1.$genomeName.bowtie2.log";
-#my $unFile = ""; 
-#if ($unFlag) {
-#        $unFile = "--un $file1.$genomeName.bowtie2.unaligned.fq";
-#}   
-#`$exe $local $unFile --no-unal -p $pCPUs -x "$bt2Index" $file > "$outputFile" 2> "$logFile"`;
-#if ($bamFlag) {
-#        my $bamFile = "$file1.$genomeName.bowtie2.tmp.bam";
-#        my $sortedBamFile = "$file1.$genomeName.bowtie2";
-#        `samtools view -S -b "$outputFile" > "$bamFile" 2>> "$logFile"`;
-#        `samtools sort -m 5000000000 "$bamFile" "$sortedBamFile" 2>> $logFile`;
-#        `rm "$outputFile" "$bamFile"`;
-#}   
+        # execute bowtie
+        command="$bowtie_path/bowtie2 \
+-p 8 \
+-x $bowtie_index_path/$genome \
+$fastqFile \
+> $outputDirectory/sam_files/$samName \
+2> $outputDirectory/log_files/$logName \n"
 
+        # create tag directory
+        command+="makeTagDirectory \
+$outputDirectory/tag_directories/$sampleName \
+-genome $genome \
+-checkGC $samFile \
+-format sam\n"
 
-elif [ $experimentType == "rna" ]
-then
-    for fastqFile in ${fastqPaths[*]} 
-        do
-        currentDirectory=${fastqFile%/*fastq}
-        sampleName=${fastqFile%/.fastq}
-        sampleName=${sampleName##/*/}
-        samName="${sampleName}.sam" # change extenseion to sam
-        logName="${sampleName}.log" # remove path preceding file name
+    elif [ $experimentType == "rna" ]
+    then
+        samName="${sampleName}.star.sam" # change extenseion to sam
+        logName="${sampleName}.star.log" # remove path preceding file name
         # execute star
         command="$star_path/STAR \
 --genomeDir $star_path/genomes/$genome \
@@ -285,16 +297,53 @@ $outputDirectory/sam_files/$samName\n"
         # rename log file
         command+="mv $currentDirectory/Log.final.out \
 $outputDirectory/log_files/$logName\n"
-    done
-else
-    echo "Error! valid choices for experiment type are 'chip' or rna' only"
-    exit 1
-fi
+        # create tag directory
+        command+="makeTagDirectory \
+$outputDirectory/tag_directories/$sampleName \
+-genome $genome \
+-checkGC $samFile \
+-format sam -flip\n"
 
-# 
+    else
+        echo "Error! valid choices for experiment type are 'chip' or rna' only"
+        exit 1
+    fi
+
+    # calculate PBC coefficient
+
+    uniqueFile=$outputDirectory/pbc/${sampleName}.unique.bam
+    sortedFile=$outputDir/pbc/${sampleName}.sorted
+    pileupFile=$outputDir/pbc/${sampleName}.pileup
+
+    command+="samtools view -Sbq 1 $outputDirectory/sam_files/$samName > \
+$uniqueFile\n"
+    command+="samtools sort $uniqueFile $sortedFile\n"
+    command+="samtools mpileup ${sortedFile}.bam > $pileupFile\n"
+    command+="PBC=\$(awk 'BEGIN {N1=0;ND=0} {if(\$4==1){N1+=1} ND+=1} END{print N1/ND}' ${pileupFile})\n"
+    command+="echo -e \"PBC    \$PBC\" >>$outputDirectory/log_files/$logName" #"
 
 
-# generate script to calculate PBC coefficient
+    # create qsub script
+    echo -e "#!/bin/bash
+#PBS -q hotel
+#PBS -N ${sampleName}_${uuid}
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=3:00:00
+#PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
+#PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
+#PBS -V
+#PBS -M $email
+#PBS -m abe
+#PBS -A glass-group
+$command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
+
+    echo "Submitting job for $sampleName"
+    # submit script
+    qsub $outputDirectory/qsub_scripts/${sampleName}.torque.sh
+done
+
+
+
 
 
 # create summary of TSCC jobs
