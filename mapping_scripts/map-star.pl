@@ -3,7 +3,7 @@
 use strict;
 #Script to map with STAR
 
-my $starDir = "/projects/glass-group/bioinformatics/STAR/";
+my $starDir = "/projects/ps-glasslab-bioinformatics/software/STAR/";
 
 my $genome = $ARGV[0];
 my $file = $ARGV[1];
