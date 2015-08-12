@@ -37,7 +37,7 @@ star_path='/projects/ps-glasslab-bioinformatics/software/STAR/'
 bowtie_path='/projects/glass-group/bioinformatics/bowtie2'
 
 # check number of arguments
-if [ $# -ne 4 ] 
+if [ $# -lt 4 ] 
 then
     echo "Usage: "
     echo "map_on_oasis.sh <experiment type (chip|rna)> <genome> \
@@ -51,29 +51,32 @@ fi
 
 ### parse the input ###
 
-OPTIND=1
+OPTIND=5
 while getopts "s:t" option ; do # set $o to the next passed option
-        case "$option" in  
-        s)  
-                fileSource=$OPTARG
-        ;;  
-        t)  
-                testing=true
-        ;;  
-        esac
+    case "$option" in  
+    s)  
+            fileSource=$OPTARG
+    ;;  
+    t)  
+            testing=true
+    ;;  
+    esac
 done
 
 experimentType=$1
 genome=$2
 email=$3
 inputDirectory=$4
-# convert fileSource to lower case
 fileSource=${fileSource,,}
 ###
 
+echo "Beginning processing for $experimentType exeriments."
+echo "Data contained in $inputDirectory will be mapped to the $genome genome"
+echo "Email notifications will be sent to $email"
+
 ### check arguments ###
 
-if ! [ $fileSource == "glassome" ] || [ $fileSource == "tscc" ]
+if [ ! $fileSource == "glassome" ] && [ $! fileSource == "tscc" ]
 then
     echo "Error! Filesource (-s) option must be set to either glassome or tscc \
 default=glassome"
@@ -84,6 +87,8 @@ fi
 if [ $fileSource == "glassome" ]
 then
     inputDirectory=$(readlink -fm ${glassome_path}/${inputDirectory/data//})
+else
+    inputDirectory=$(readlink -fm $inputDirectory)
 fi
 
 # check that experiment type is rna (for RNA-seq) or chip (for ChIP-seq and etc)
@@ -117,16 +122,15 @@ else
 fi
 
 ###
-
 #### copy files to oasis ###
 
-if ! [[ $inputDirectory == "/oasis/tscc/scratch/*" ]]
+if ! [[ $inputDirectory == "/oasis/tscc/scratch/"* ]]
 then
     outputDirectory="/oasis/tscc/scratch/$USER/${inputDirectory##*/}"
     if [ -d $outputDirectory ]
     then
         read -p "$outputDirectory already exists! Would you like to delete it\
- [yY]?" -n 1 r
+ [yn]?" -n 1 r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]
         then
@@ -146,6 +150,7 @@ else
     outputDirectory=$inputDirectory
 fi
 
+
 ###
 
 ### decompress fastq.gz files
@@ -154,7 +159,6 @@ echo "Decompressing raw data (fastq.gz files)"
 
 # find fastq.gz files
 compressedDirs=()
-echo $outputDirectory
 compressedPaths=( $(find $outputDirectory -path *fastq.gz -type f) )
 for f in ${compressedPaths[*]}
 do
@@ -209,14 +213,43 @@ do
     fi  
 done
 
+# create output directories
 
-### generate qsub scripts ###
+# create directory where data will be stored on glassome
+glassomeOutputDirectory="/projects/ps-glasslab-data/scratch/${inputDirectory##*/}"
+if [ ! -d $glassomeOutputDirectory ]
+then
+    mkdir $glassomeOutputDirectory
+else
+    read -p "This script will copy output files to $glassomeOutputDirectory, \
+which already exists! Would you like to delete it [yn]?" -n 1 r 
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        rm -rf $glassomeOutputDirectory
+        mkdir $glassomeOutputDirectory
+    fi
+fi
+
+# make directory for tag directories on Glassome
+if [ ! -d $glassomeOutputDirectory/tag_directories ]
+then
+    mkdir $glassomeOutputDirectory/tag_directories
+fi
+
+# make directory for log files on Glassome
+if [ ! -d $glassomeOutputDirectory/log_files ]
+then
+    mkdir $glassomeOutputDirectory/log_files
+fi
 
 if [ ! -d $outputDirectory/qsub_scripts ]
 then
     mkdir $outputDirectory/qsub_scripts
+else
+    # delete existing scripts
+    rm $outputDirectory/qsub_scripts/*
 fi
-rm $outputDirectory/qsub_scripts/*
 
 # make directory for sam files
 if [ ! -d $outputDirectory/sam_files ]
@@ -224,13 +257,13 @@ then
     mkdir $outputDirectory/sam_files
 fi
 
-# make directory for tag directories
+# make directory for tag directories on tscc
 if [ ! -d $outputDirectory/tag_directories ]
 then
     mkdir $outputDirectory/tag_directories
 fi
 
-# make directory for log files
+# make directory for log files on tscc
 if [ ! -d $outputDirectory/log_files ]
 then
     mkdir $outputDirectory/log_files
@@ -241,6 +274,8 @@ if [ ! -d $outputDirectory/pbc ]
 then
     mkdir $outputDirectory/pbc
 fi
+
+### generate qsub scripts ###
 
 # generate a UUID for this set of jobs
 uuid=$[ 1 + $[ RANDOM % 10000 ]] # generate a random number between 0 and 10000
@@ -279,7 +314,7 @@ $fastqFile \
         command+="makeTagDirectory \
 $outputDirectory/tag_directories/$sampleName \
 -genome $genome \
--checkGC $samFile \
+-checkGC $outputDirectory/sam_files/$samName \
 -format sam\n"
 
     elif [ $experimentType == "rna" ]
@@ -290,6 +325,7 @@ $outputDirectory/tag_directories/$sampleName \
         command="$star_path/STAR \
 --genomeDir $star_path/genomes/$genome \
 --readFilesIn $fastqFile \
+--outFileNamePrefix $currentDirectory/ \
 --runThreadN 4\n"
         # rename aligned file
         command+="mv $currentDirectory/Aligned.out.sam \
@@ -301,7 +337,7 @@ $outputDirectory/log_files/$logName\n"
         command+="makeTagDirectory \
 $outputDirectory/tag_directories/$sampleName \
 -genome $genome \
--checkGC $samFile \
+-checkGC $outputDirectory/sam_files/$samName \
 -format sam -flip\n"
 
     else
@@ -312,8 +348,8 @@ $outputDirectory/tag_directories/$sampleName \
     # calculate PBC coefficient
 
     uniqueFile=$outputDirectory/pbc/${sampleName}.unique.bam
-    sortedFile=$outputDir/pbc/${sampleName}.sorted
-    pileupFile=$outputDir/pbc/${sampleName}.pileup
+    sortedFile=$outputDirectory/pbc/${sampleName}.sorted
+    pileupFile=$outputDirectory/pbc/${sampleName}.pileup
 
     command+="samtools view -Sbq 1 $outputDirectory/sam_files/$samName > \
 $uniqueFile\n"
@@ -322,13 +358,21 @@ $uniqueFile\n"
     command+="PBC=\$(awk 'BEGIN {N1=0;ND=0} {if(\$4==1){N1+=1} ND+=1} END{print N1/ND}' ${pileupFile})\n"
     command+="echo -e \"PBC    \$PBC\" >>$outputDirectory/log_files/$logName" #"
 
+    # copy files to Glassome scratch directory
+    # copy log file
+    command+="cp $outputDirectory/log_files/$logName \
+$glassomeOutputDirectory/log_files\n"
+    command+="cp -r $outputDirectory/tag_directories/$sampleName \
+$glassomeOutputDirectory/tag_directories\n"
+    
+
 
     # create qsub script
     echo -e "#!/bin/bash
 #PBS -q hotel
-#PBS -N ${sampleName}_${uuid}
+#PBS -N ${sampleName}_${experimentType}_${genome}_${uuid}
 #PBS -l nodes=1:ppn=8
-#PBS -l walltime=3:00:00
+#PBS -l walltime=4:00:00
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
 #PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
 #PBS -V
@@ -339,29 +383,11 @@ $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
 
     echo "Submitting job for $sampleName"
     # submit script
-    qsub $outputDirectory/qsub_scripts/${sampleName}.torque.sh
+    if ! $testing
+        then
+        qsub $outputDirectory/qsub_scripts/${sampleName}.torque.sh
+    fi
 done
-
-
-
-
-
-# create summary of TSCC jobs
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### LICENSE STATEMENT ###
 # Copyright (c) 2015, Jenhan Tao 
