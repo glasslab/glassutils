@@ -122,6 +122,23 @@ else
 fi
 
 ###
+
+# create directory where data will be stored on glassome
+glassomeOutputDirectory="/projects/ps-glasslab-data/scratch/$USER/${inputDirectory##*/}"
+if [ ! -d $glassomeOutputDirectory ]
+then
+    mkdir -p $glassomeOutputDirectory
+else
+    read -p "This script will copy output files to $glassomeOutputDirectory, \
+which already exists! Would you like to delete it [yn]?" -n 1 r 
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        rm -rf $glassomeOutputDirectory
+        mkdir -p $glassomeOutputDirectory
+    fi
+fi
+
 #### copy files to oasis ###
 
 if ! [[ $inputDirectory == "/oasis/tscc/scratch/"* ]]
@@ -214,22 +231,6 @@ do
 done
 
 # create output directories
-
-# create directory where data will be stored on glassome
-glassomeOutputDirectory="/projects/ps-glasslab-data/scratch/${inputDirectory##*/}"
-if [ ! -d $glassomeOutputDirectory ]
-then
-    mkdir $glassomeOutputDirectory
-else
-    read -p "This script will copy output files to $glassomeOutputDirectory, \
-which already exists! Would you like to delete it [yn]?" -n 1 r 
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        rm -rf $glassomeOutputDirectory
-        mkdir $glassomeOutputDirectory
-    fi
-fi
 
 # make directory for tag directories on Glassome
 if [ ! -d $glassomeOutputDirectory/tag_directories ]
@@ -356,7 +357,7 @@ $uniqueFile\n"
     command+="samtools sort $uniqueFile $sortedFile\n"
     command+="samtools mpileup ${sortedFile}.bam > $pileupFile\n"
     command+="PBC=\$(awk 'BEGIN {N1=0;ND=0} {if(\$4==1){N1+=1} ND+=1} END{print N1/ND}' ${pileupFile})\n"
-    command+="echo -e \"PBC    \$PBC\" >>$outputDirectory/log_files/$logName" #"
+    command+="echo -e \"PBC    \$PBC\" >>$outputDirectory/log_files/$logName\n" #"
 
     # copy files to Glassome scratch directory
     # copy log file
@@ -370,7 +371,7 @@ $glassomeOutputDirectory/tag_directories\n"
     # create qsub script
     echo -e "#!/bin/bash
 #PBS -q hotel
-#PBS -N ${sampleName}_${experimentType}_${genome}_${uuid}
+#PBS -N ${sampleName}_${experimentType}_${genome}
 #PBS -l nodes=1:ppn=8
 #PBS -l walltime=4:00:00
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
