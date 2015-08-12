@@ -130,7 +130,8 @@ then
     mkdir -p $glassomeOutputDirectory
 else
     read -p "This script will copy output files to $glassomeOutputDirectory, \
-which already exists! Would you like to delete it [yn]?" -n 1 r 
+which already exists! Would you like to delete it. \
+Enter "y" for yes and "n" for no [yn]?" -n 1 r 
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
@@ -146,8 +147,9 @@ then
     outputDirectory="/oasis/tscc/scratch/$USER/${inputDirectory##*/}"
     if [ -d $outputDirectory ]
     then
-        read -p "$outputDirectory already exists! Would you like to delete it\
- [yn]?" -n 1 r
+        read -p "$outputDirectory already exists on tscc! \
+Would you like to delete it and recopy files?\
+ Enter "y" for yes and "n" for no [yn]" -n 1 r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]
         then
@@ -156,8 +158,7 @@ then
             echo "Copying files from $inputDirectory to $outputDirectory"
             scp -r $inputDirectory $outputDirectory
         else
-            echo "Copying files from $inputDirectory to $outputDirectory"
-            scp -r $inputDirectory /oasis/tscc/scratch/$USER/
+            echo "Files in $inputDirectory won't be copied to $outputDirectory"
         fi
     else
         echo "Copying files from $inputDirectory to $outputDirectory"
