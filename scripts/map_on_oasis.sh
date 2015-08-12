@@ -236,13 +236,13 @@ done
 # make directory for tag directories on Glassome
 if [ ! -d $glassomeOutputDirectory/tag_directories ]
 then
-    mkdir $glassomeOutputDirectory/tag_directories
+    mkdir -p $glassomeOutputDirectory/tag_directories
 fi
 
 # make directory for log files on Glassome
 if [ ! -d $glassomeOutputDirectory/log_files ]
 then
-    mkdir $glassomeOutputDirectory/log_files
+    mkdir -p $glassomeOutputDirectory/log_files
 fi
 
 if [ ! -d $outputDirectory/qsub_scripts ]
