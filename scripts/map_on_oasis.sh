@@ -287,8 +287,8 @@ for sampleDir in ${sampleDirs[*]}
     # map file
     if [ $experimentType == "chip" ]
     then
-        samName="${sampleName}.bowtie2.sam" # change extension to sam
-        logName="${sampleName}.bowtie2.log" # remove path preceding file name
+        samName="${sampleName}.${genome}.bowtie2.sam" # change extension to sam
+        logName="${sampleName}.${genome}.bowtie2.log" # remove path preceding file name
 
         # execute bowtie
         command="$bowtie_path/bowtie2 \
@@ -307,8 +307,8 @@ $outputDirectory/tag_directories/$sampleName \
 
     elif [ $experimentType == "rna" ]
     then
-        samName="${sampleName}.star.sam" # change extension to sam
-        logName="${sampleName}.star.log" # remove path preceding file name
+        samName="${sampleName}.${genome}.star.sam" # change extension to sam
+        logName="${sampleName}.${genome}.star.log" # remove path preceding file name
         # execute star
         command="$star_path/STAR \
 --genomeDir $star_path/genomes/$genome \
