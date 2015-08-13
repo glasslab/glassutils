@@ -51,9 +51,9 @@ fi
 ### parse the input ###
 
 OPTIND=5
-while getopts "st" option ; do # set $o to the next passed option
+while getopts "lt" option ; do # set $o to the next passed option
     case "$option" in  
-    s)  
+    l)  
        map_local_files=true 
     ;;  
     t)  
