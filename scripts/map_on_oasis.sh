@@ -22,13 +22,13 @@
 
 
 ### OPTIONS AND ARGUMENTS ###
-# -s <fileSource> (where the raw data is - Glassome or TSCC, default = Glassome)
+# -l map files that are on the TSCC already
 # -t generate qsub scripts but do not execute them
 ### 
 
 ### set default options ###
 
-fileSource="glassome"
+map_local_files=false
 testing=false
 glassome_path='/projects/ps-glasslab-data/'
 mappingScripts_path='/projects/ps-glasslab-bioinformatics/glassutils/mapping_scripts/'
@@ -43,8 +43,7 @@ then
     echo "map_on_oasis.sh <experiment type (chip|rna)> <genome> \
 <email> <input file directory> [optional arguments]"
     echo "Options:
--s    <fileSource> (where the raw data is - Glassome or \
-TSCC, default = Glassome)
+-l    map files already located on the tscc
 -t    generate qsub scripts but do not execute them"
     exit 1
 fi
@@ -52,13 +51,13 @@ fi
 ### parse the input ###
 
 OPTIND=5
-while getopts "s:t" option ; do # set $o to the next passed option
+while getopts "st" option ; do # set $o to the next passed option
     case "$option" in  
     s)  
-            fileSource=$OPTARG
+       map_local_files=true 
     ;;  
     t)  
-            testing=true
+        testing=true
     ;;  
     esac
 done
@@ -67,7 +66,6 @@ experimentType=$1
 genome=$2
 email=$3
 inputDirectory=$4
-fileSource=${fileSource,,}
 ###
 
 echo "Beginning processing for $experimentType exeriments."
@@ -76,15 +74,8 @@ echo "Email notifications will be sent to $email"
 
 ### check arguments ###
 
-if [ ! $fileSource == "glassome" ] && [ $! fileSource == "tscc" ]
-then
-    echo "Error! Filesource (-s) option must be set to either glassome or tscc \
-default=glassome"
-    exit 1
-fi
-
-# modify the input file path if fileSource is Glassome
-if [ $fileSource == "glassome" ]
+#if [ $fileSource == "glassome" ]
+if ! $map_local_files
 then
     inputDirectory=$(readlink -fm ${glassome_path}/${inputDirectory/data//})
 else
@@ -99,26 +90,21 @@ then
 fi
 
 # check that the input directory exists on specified fileSource machine
-if [ $fileSource == "tscc" ]
+if $map_local_files
 then
     if [ ! -d $inputDirectory ]
     then
-        echo "Error! $inputDirectory cannot be found on the TSCC - try using \
-glassome instead for the -s option" 
-        exit 1
-    fi    
-
-elif [ $fileSource == "glassome" ]
-then
-    if [ ! -d $inputDirectory ]
-    then
-        echo "Error! $inputDirectory cannot be found on the Glassome - try \
-using tscc instead for the -s option" 
+        echo "Error! $inputDirectory cannot be found on the TSCC - try removing\
+ the -l option" 
         exit 1
     fi    
 else
-    echo "Error! Unknown problem with inputDirectory: $inputDirectory"
-    exit 1
+    if [ ! -d $inputDirectory ]
+    then
+        echo "Error! $inputDirectory cannot be found on the Glassome - try \
+using the -l option" 
+        exit 1
+    fi    
 fi
 
 ###
@@ -131,7 +117,7 @@ then
 else
     read -p "This script will copy output files to $glassomeOutputDirectory, \
 which already exists! Would you like to delete it. \
-Enter "y" for yes and "n" for no [yn]?" -n 1 r 
+Enter y for yes and n for no [yn]?" -n 1 -r 
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
@@ -149,7 +135,7 @@ then
     then
         read -p "$outputDirectory already exists on tscc! \
 Would you like to delete it and recopy files?\
- Enter "y" for yes and "n" for no [yn]" -n 1 r
+ Enter y for yes and n for no [yn]" -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]
         then
