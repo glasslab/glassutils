@@ -289,9 +289,9 @@ codebase=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # generate script to map fastq to genome
 
 # find all fastq files
-fastqPaths=( $(find $outputDirectory -path *fastq -type f) )
-for fastqFile in ${fastqPaths[*]} 
+for sampleDir in ${sampleDirs[*]}
     do
+    fastqFile=$(readlink -fm $sampleDir/*fastq)
     currentDirectory=${fastqFile%/*fastq}
     sampleName=${fastqFile%.fastq}
     sampleName=${sampleName##/*/}
@@ -301,7 +301,7 @@ for fastqFile in ${fastqPaths[*]}
     # map file
     if [ $experimentType == "chip" ]
     then
-        samName="${sampleName}.bowtie2.sam" # change extenseion to sam
+        samName="${sampleName}.bowtie2.sam" # change extension to sam
         logName="${sampleName}.bowtie2.log" # remove path preceding file name
 
         # execute bowtie
@@ -321,7 +321,7 @@ $outputDirectory/tag_directories/$sampleName \
 
     elif [ $experimentType == "rna" ]
     then
-        samName="${sampleName}.star.sam" # change extenseion to sam
+        samName="${sampleName}.star.sam" # change extension to sam
         logName="${sampleName}.star.log" # remove path preceding file name
         # execute star
         command="$star_path/STAR \
@@ -387,7 +387,8 @@ $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
     # submit script
     if ! $testing
         then
-        qsub $outputDirectory/qsub_scripts/${sampleName}.torque.sh
+        echo $sampleName
+#        qsub $outputDirectory/qsub_scripts/${sampleName}.torque.sh
     fi
 done
 
