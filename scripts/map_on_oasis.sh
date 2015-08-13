@@ -360,6 +360,10 @@ $uniqueFile\n"
     command+="PBC=\$(awk 'BEGIN {N1=0;ND=0} {if(\$4==1){N1+=1} ND+=1} END{print N1/ND}' ${pileupFile})\n"
     command+="echo -e \"PBC    \$PBC\" >>$outputDirectory/log_files/$logName\n" #"
 
+    # copy log file to tag directory
+    command+="cp $outputDirectory/log_files/$logName \
+$outputDirectory/tag_directories/$sampleName\n"
+    
     # copy files to Glassome scratch directory
     # copy log file
     command+="cp $outputDirectory/log_files/$logName \
@@ -383,10 +387,10 @@ $glassomeOutputDirectory/tag_directories\n"
 #PBS -A glass-group
 $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
 
-    echo "Submitting job for $sampleName"
     # submit script
     if ! $testing
         then
+        echo "Submitting job for $sampleName"
         qsub $outputDirectory/qsub_scripts/${sampleName}.torque.sh
     fi
 done
