@@ -387,8 +387,7 @@ $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
     # submit script
     if ! $testing
         then
-        echo $sampleName
-#        qsub $outputDirectory/qsub_scripts/${sampleName}.torque.sh
+        qsub $outputDirectory/qsub_scripts/${sampleName}.torque.sh
     fi
 done
 
