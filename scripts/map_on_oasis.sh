@@ -43,7 +43,7 @@ then
     echo "map_on_oasis.sh <experiment type (chip|rna)> <genome> \
 <email> <input file directory> [optional arguments]"
     echo "Options:
--l    map files already located on the tscc
+-l    map files already on tscc or are already copied over
 -t    generate qsub scripts but do not execute them"
     exit 1
 fi
@@ -79,7 +79,12 @@ if ! $map_local_files
 then
     inputDirectory=$(readlink -fm ${glassome_path}/${inputDirectory/data//})
 else
-    inputDirectory=$(readlink -fm $inputDirectory)
+    if [[ $inputDirectory == "/oasis/tscc/scratch/"* ]]
+    then
+        inputDirectory=$(readlink -fm $inputDirectory)
+    else
+        inputDirectory=$(readlink -fm ${glassome_path}/${inputDirectory/data//})
+    fi
 fi
 
 # check that experiment type is rna (for RNA-seq) or chip (for ChIP-seq and etc)
