@@ -35,6 +35,7 @@ mappingScripts_path='/projects/ps-glasslab-bioinformatics/glassutils/mapping_scr
 bowtie_index_path='/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes/'
 star_path='/projects/ps-glasslab-bioinformatics/software/STAR/'
 bowtie_path='/projects/glass-group/bioinformatics/bowtie2'
+homer_path='/projects/glass-group/bioinformatics/homer/bin/'
 
 # check number of arguments
 if [ $# -lt 4 ] 
@@ -305,7 +306,7 @@ $fastqFile \
 2> $outputDirectory/log_files/$logName \n"
 
         # create tag directory
-        command+="makeTagDirectory \
+        command+="$homer_path/makeTagDirectory \
 $outputDirectory/tag_directories/$sampleName \
 -genome $genome \
 -checkGC $outputDirectory/sam_files/$samName \
@@ -329,7 +330,7 @@ $outputDirectory/sam_files/$samName\n"
         command+="mv $currentDirectory/Log.final.out \
 $outputDirectory/log_files/$logName\n"
         # create tag directory
-        command+="makeTagDirectory \
+        command+="$homer_path/makeTagDirectory \
 $outputDirectory/tag_directories/${sampleName} \
 -genome $genome \
 -checkGC $outputDirectory/sam_files/$samName \
@@ -347,7 +348,7 @@ $fastqFile \
 > $outputDirectory/sam_files/$samName \
 2> $outputDirectory/log_files/$logName \n"
         # create tag directory
-        command+="makeTagDirectory \
+        command+="$homer_path/makeTagDirectory \
 $outputDirectory/tag_directories/${sampleName}_withM \
 -genome $genome \
 -checkGC $outputDirectory/sam_files/$samName \
@@ -355,7 +356,7 @@ $outputDirectory/tag_directories/${sampleName}_withM \
         # remove contaminating tags from chromosome M
         command+="rm $outputDirectory/tag_directories/${sampleName}_with_M/chrM.tags.tsv\n"
         # remake tag directory
-        command+="makeTagDirectory \
+        command+="$homer_path/makeTagDirectory \
 $outputDirectory/tag_directories/${sampleName} -d \
 $outputDirectory/tag_directories/${sampleName}_with_M\n"
         # copy original tag info file
