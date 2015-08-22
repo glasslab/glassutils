@@ -40,7 +40,7 @@ bowtie_path='/projects/glass-group/bioinformatics/bowtie2'
 if [ $# -lt 4 ] 
 then
     echo "Usage: "
-    echo "map_on_oasis.sh <experiment type (chip|rna)> <genome> \
+    echo "map_on_oasis.sh <experiment type (atac|chip|rna)> <genome> \
 <email> <input file directory> [optional arguments]"
     echo "Options:
 -l    map files already on tscc or are already copied over
@@ -88,9 +88,9 @@ else
 fi
 
 # check that experiment type is rna (for RNA-seq) or chip (for ChIP-seq and etc)
-if [ ! $experimentType == "rna" ] && [ ! $experimentType == "chip" ]
+if [ ! $experimentType == "rna" ] && [ ! $experimentType == "chip" ] && [ ! $experimentType == "atac" ]
 then
-    echo "Error! valid choices for experiment type are 'chip' or rna' only"
+    echo "Error! valid choices for experiment type are 'atac', 'chip' or rna'"
     exit 1
 fi
 
@@ -290,6 +290,7 @@ for sampleDir in ${sampleDirs[*]}
     logName=""
 
     # map file
+    ### ChIP-seq ###
     if [ $experimentType == "chip" ]
     then
         samName="${sampleName}.${genome}.bowtie2.sam" # change extension to sam
@@ -310,6 +311,7 @@ $outputDirectory/tag_directories/$sampleName \
 -checkGC $outputDirectory/sam_files/$samName \
 -format sam\n"
 
+    ### RNA-seq ###
     elif [ $experimentType == "rna" ]
     then
         samName="${sampleName}.${genome}.star.sam" # change extension to sam
@@ -328,13 +330,43 @@ $outputDirectory/sam_files/$samName\n"
 $outputDirectory/log_files/$logName\n"
         # create tag directory
         command+="makeTagDirectory \
-$outputDirectory/tag_directories/$sampleName \
+$outputDirectory/tag_directories/${sampleName} \
 -genome $genome \
 -checkGC $outputDirectory/sam_files/$samName \
 -format sam -flip\n"
+    ### ATAC-seq ###
+    elif [ $experimentType == "atac" ]
+    then
+        samName="${sampleName}.${genome}.bowtie2.sam" # change extension to sam
+        logName="${sampleName}.${genome}.bowtie2.log" # remove path preceding file name
+        # execute bowtie
+        command="$bowtie_path/bowtie2 \
+-p 8 \
+-x $bowtie_index_path/$genome \
+$fastqFile \
+> $outputDirectory/sam_files/$samName \
+2> $outputDirectory/log_files/$logName \n"
+        # create tag directory
+        command+="makeTagDirectory \
+$outputDirectory/tag_directories/${sampleName}_withM \
+-genome $genome \
+-checkGC $outputDirectory/sam_files/$samName \
+-format sam\n"
+        # remove contaminating tags from chromosome M
+        command+="rm $outputDirectory/tag_directories/${sampleName}_with_M/chrM.tags.tsv\n"
+        # remake tag directory
+        command+="makeTagDirectory \
+$outputDirectory/tag_directories/${sampleName} -d \
+$outputDirectory/tag_directories/${sampleName}_with_M\n"
+        # copy original tag info file
+        command+="mv \
+$outputDirectory/tag_directories/${sampleName}_with_M/tagInfo.txt \
+$outputDirectory/tag_directories/${sampleName}/tagInfo_with_M.txt\n"
+        # remove original tag directory
+        command+="rm -rf $outputDirectory/tag_directories/${sampleName}_with_M\n"
 
     else
-        echo "Error! valid choices for experiment type are 'chip' or rna' only"
+        echo "Error! valid choices for experiment type are atac, chip or rna"
         exit 1
     fi
 
