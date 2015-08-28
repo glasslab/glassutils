@@ -30,6 +30,8 @@
 
 map_local_files=false
 testing=false
+map_only=false
+no_emails=false
 glassome_path='/projects/ps-glasslab-data/'
 mappingScripts_path='/projects/ps-glasslab-bioinformatics/glassutils/mapping_scripts/'
 bowtie_index_path='/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes/'
@@ -45,20 +47,28 @@ then
 <email> <input file directory> [optional arguments]"
     echo "Options:
 -l    map files already on tscc or are already copied over
--t    generate qsub scripts but do not execute them"
+-t    generate qsub scripts but do not execute them
+-m    only map files - do not create tag directories
+-e    do not send email notifications"
     exit 1
 fi
 
 ### parse the input ###
 
 OPTIND=5
-while getopts "lt" option ; do # set $o to the next passed option
+while getopts "ltm" option ; do # set $o to the next passed option
     case "$option" in  
     l)  
        map_local_files=true 
     ;;  
     t)  
         testing=true
+    ;;  
+    m)  
+        map_only=true
+    ;;  
+    e)  
+        no_emails=true
     ;;  
     esac
 done
@@ -286,7 +296,9 @@ for sampleDir in ${sampleDirs[*]}
     fastqFile=$(readlink -fm $sampleDir/*fastq)
     currentDirectory=${fastqFile%/*fastq}
     sampleName=${fastqFile%.fastq}
-    sampleName=${sampleName##/*/}
+    sampleName=${sampleName##/*/} # remove preceding file path
+    sampleName=${sampleName#Sample_} # remove "Sample_" from file names"
+
     samName=""
     logName=""
 
@@ -306,11 +318,14 @@ $fastqFile \
 2> $outputDirectory/log_files/$logName \n"
 
         # create tag directory
-        command+="$homer_path/makeTagDirectory \
+        if ! $map_only
+        then
+            command+="$homer_path/makeTagDirectory \
 $outputDirectory/tag_directories/$sampleName \
 -genome $genome \
 -checkGC $outputDirectory/sam_files/$samName \
 -format sam\n"
+        fi
 
     ### RNA-seq ###
     elif [ $experimentType == "rna" ]
@@ -330,11 +345,14 @@ $outputDirectory/sam_files/$samName\n"
         command+="mv $currentDirectory/Log.final.out \
 $outputDirectory/log_files/$logName\n"
         # create tag directory
+        if ! $map_only
+        then
         command+="$homer_path/makeTagDirectory \
 $outputDirectory/tag_directories/${sampleName} \
 -genome $genome \
 -checkGC $outputDirectory/sam_files/$samName \
 -format sam -flip\n"
+        fi
     ### ATAC-seq ###
     elif [ $experimentType == "atac" ]
     then
@@ -348,6 +366,8 @@ $fastqFile \
 > $outputDirectory/sam_files/$samName \
 2> $outputDirectory/log_files/$logName \n"
         # create tag directory
+        if ! $map_only
+        then
         command+="$homer_path/makeTagDirectory \
 $outputDirectory/tag_directories/${sampleName}_withM \
 -genome $genome \
@@ -365,6 +385,7 @@ $outputDirectory/tag_directories/${sampleName}_with_M/tagInfo.txt \
 $outputDirectory/tag_directories/${sampleName}/tagInfo_with_M.txt\n"
         # remove original tag directory
         command+="rm -rf $outputDirectory/tag_directories/${sampleName}_with_M\n"
+        fi
 
     else
         echo "Error! valid choices for experiment type are atac, chip or rna"
@@ -384,20 +405,25 @@ $uniqueFile\n"
     command+="PBC=\$(awk 'BEGIN {N1=0;ND=0} {if(\$4==1){N1+=1} ND+=1} END{print N1/ND}' ${pileupFile})\n"
     command+="echo -e \"PBC    \$PBC\" >>$outputDirectory/log_files/$logName\n" #"
 
-    # copy log file to tag directory
-    command+="cp $outputDirectory/log_files/$logName \
-$outputDirectory/tag_directories/$sampleName\n"
     
     # copy files to Glassome scratch directory
     # copy log file
     command+="cp $outputDirectory/log_files/$logName \
 $glassomeOutputDirectory/log_files\n"
-    command+="cp -r $outputDirectory/tag_directories/$sampleName \
+    if ! $map_only
+    then
+        command+="cp -r $outputDirectory/tag_directories/$sampleName \
 $glassomeOutputDirectory/tag_directories\n"
+    # copy log file to tag directory
+        command+="cp $outputDirectory/log_files/$logName \
+$outputDirectory/tag_directories/$sampleName\n"
+    fi
     
 
 
     # create qsub script
+    if $no_emails
+    then
     echo -e "#!/bin/bash
 #PBS -q hotel
 #PBS -N ${sampleName}_${experimentType}_${genome}
@@ -410,6 +436,20 @@ $glassomeOutputDirectory/tag_directories\n"
 #PBS -m abe
 #PBS -A glass-group
 $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
+    else
+    echo -e "#!/bin/bash
+#PBS -q hotel
+#PBS -N ${sampleName}_${experimentType}_${genome}
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=4:00:00
+#PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
+#PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
+#PBS -V
+#PBS -m abe
+#PBS -A glass-group
+$command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
+    fi
+    
 
     # submit script
     if ! $testing
