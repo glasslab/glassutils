@@ -56,7 +56,7 @@ fi
 ### parse the input ###
 
 OPTIND=5
-while getopts "ltm" option ; do # set $o to the next passed option
+while getopts "ltme" option ; do # set $o to the next passed option
     case "$option" in  
     l)  
        map_local_files=true 
@@ -81,7 +81,22 @@ inputDirectory=$4
 
 echo "Beginning processing for $experimentType exeriments."
 echo "Data contained in $inputDirectory will be mapped to the $genome genome"
-echo "Email notifications will be sent to $email"
+if $no_emails
+then
+    echo "Email notifications have been disabled"
+else
+    echo "Email notifications will be sent to $email"
+fi
+
+if $map_only
+then
+    echo "You are using the map only option - tag directories won't be created"
+fi
+
+if $testing
+then
+    echo "Testing option enabled - qsub scripts will not be activated"
+fi
 
 ### check arguments ###
 
@@ -432,7 +447,6 @@ $outputDirectory/tag_directories/$sampleName\n"
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
 #PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
 #PBS -V
-#PBS -M $email
 #PBS -m abe
 #PBS -A glass-group
 $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
@@ -444,6 +458,7 @@ $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
 #PBS -l walltime=4:00:00
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
 #PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
+#PBS -M $email
 #PBS -V
 #PBS -m abe
 #PBS -A glass-group
