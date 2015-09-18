@@ -38,6 +38,7 @@ bowtie_index_path='/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes
 star_path='/projects/ps-glasslab-bioinformatics/software/STAR/'
 bowtie_path='/projects/glass-group/bioinformatics/bowtie2'
 homer_path='/projects/glass-group/bioinformatics/homer/bin/'
+#homer_path='/projects/ps-glasslab-bioinformatics/homer/bin/'
 
 # check number of arguments
 if [ $# -lt 4 ] 
@@ -194,17 +195,21 @@ echo "Decompressing raw data (fastq.gz files)"
 
 # find fastq.gz files
 compressedDirs=()
-compressedPaths=( $(find $outputDirectory -path *fastq.gz -type f) )
+compressedPaths_1=( $(find $outputDirectory -path *fastq.gz -type f) )
+compressedPaths_2=( $(find $outputDirectory -path *sra -type f) )
+compressedPaths=( ${compressedPaths_1[@]} ${compressedPaths_2[@]} )
 for f in ${compressedPaths[*]}
 do
     # remove file name to get sample directory
     compressedDir=${f%/*gz}
+    compressedDir=${compressedDir%/*sra}
     # append sample directory to list
     compressedDirs[${#compressedDirs[*]}]=$compressedDir
 done
 
 # filter out duplicated directories
 sampleDirs=$(echo "${compressedDirs[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+
 
 for sample_dir in ${sampleDirs[*]}
 do
