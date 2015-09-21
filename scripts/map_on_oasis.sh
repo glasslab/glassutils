@@ -389,7 +389,7 @@ $fastqFile \
         if ! $map_only
         then
         command+="$homer_path/makeTagDirectory \
-$outputDirectory/tag_directories/${sampleName}_withM \
+$outputDirectory/tag_directories/${sampleName}_with_M \
 -genome $genome \
 -checkGC $outputDirectory/sam_files/$samName \
 -format sam\n"
