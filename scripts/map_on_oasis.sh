@@ -32,6 +32,7 @@ map_local_files=false
 testing=false
 map_only=false
 no_emails=false
+paired=false
 glassome_path='/projects/ps-glasslab-data/'
 mappingScripts_path='/projects/ps-glasslab-bioinformatics/glassutils/mapping_scripts/'
 bowtie_index_path='/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes/'
@@ -50,14 +51,15 @@ then
 -l    map files already on tscc or are already copied over
 -t    generate qsub scripts but do not execute them
 -m    only map files - do not create tag directories
--e    do not send email notifications"
+-e    do not send email notifications
+-p    input data is paired end"
     exit 1
 fi
 
 ### parse the input ###
 
 OPTIND=5
-while getopts "ltme" option ; do # set $o to the next passed option
+while getopts "ltmep" option ; do # set $o to the next passed option
     case "$option" in  
     l)  
        map_local_files=true 
@@ -71,6 +73,9 @@ while getopts "ltme" option ; do # set $o to the next passed option
     e)  
         no_emails=true
     ;;  
+    p)  
+        paired=true
+    ;;  
     esac
 done
 
@@ -82,6 +87,12 @@ inputDirectory=$4
 
 echo "Beginning processing for $experimentType exeriments."
 echo "Data contained in $inputDirectory will be mapped to the $genome genome"
+if $paired
+then
+    echo "Paired end option specified. This script is designed to work with
+Illumina paired end reads only"
+fi
+
 if $no_emails
 then
     echo "Email notifications have been disabled"
@@ -186,17 +197,15 @@ else
     outputDirectory=$inputDirectory
 fi
 
-
-###
-
 ### decompress fastq.gz files
 
 echo "Decompressing raw data (fastq.gz files)"
 
 # find fastq.gz files
 compressedDirs=()
-compressedPaths_1=( $(find $outputDirectory -path *fastq.gz -type f) )
-compressedPaths_2=( $(find $outputDirectory -path *sra -type f) )
+echo $outputDirectory
+compressedPaths_1=( $(find $outputDirectory -path "*fastq.gz" -type f) )
+compressedPaths_2=( $(find $outputDirectory -path "*sra" -type f) )
 compressedPaths=( ${compressedPaths_1[@]} ${compressedPaths_2[@]} )
 for f in ${compressedPaths[*]}
 do
@@ -217,40 +226,94 @@ do
     echo "Decompressing $bname"
 
     # If there is exactly one fastq file, use that; otherwise...
-    if ls $sample_dir/*.fastq &> /dev/null; then
-        if [ `ls -l $sample_dir/*.fastq | wc -l` -ne 1 ]; then
-            cat $sample_dir/*.fastq > $sample_dir/$bname.fastq_joined
-            rm $sample_dir/*.fastq
-            mv $sample_dir/$bname.fastq_joined $sample_dir/$bname.fastq
+    if $paired
+    then
+        # for paired end sequence
+        if ls $sample_dir/*.fastq &> /dev/null; then
+            if [ `ls -l $sample_dir/*.fastq | wc -l` -ne 2 ]; then
+                # for first set of reads
+                cat $sample_dir/*R1*.fastq > $sample_dir/$bname.fastq_joined
+                rm $sample_dir/*R1*.fastq
+                mv $sample_dir/$bname.fastq_joined $sample_dir/${bname}_R1.fastq
+                # for second set of reads
+                cat $sample_dir/*R2*.fastq > $sample_dir/$bname.fastq_joined
+                rm $sample_dir/*R2*.fastq
+                mv $sample_dir/$bname.fastq_joined $sample_dir/${bname}_R2.fastq
+            fi  
+            # else, only one .fastq; will be used.
+        else
+            # If there are any .sra files, dump to .fastq
+            if ls $sample_dir/*.sra &> /dev/null; then 
+                for sra in $sample_dir/*.sra
+                    do  
+                        current_dir=`pwd`
+                        # CD in so that fastq-dump works correctly
+                        cd $sample_dir
+                        fastq-dump $sra
+                        rm $sra
+                        cd $current_dir
+                    done
+                # Then compile all the .fastq
+                if [ `ls -l $sample_dir/*.fastq | wc -l` -ne 2 ]; then
+                    # for first set of reads
+                    cat $sample_dir/*R1*.fastq > $sample_dir/$bname.fastq_joined
+                    rm $sample_dir/*R1*.fastq
+                    mv $sample_dir/$bname.fastq_joined $sample_dir/${bname}_R1.fastq
+                    # for second set of reads
+                    cat $sample_dir/*R2*.fastq > $sample_dir/$bname.fastq_joined
+                    rm $sample_dir/*R2*.fastq
+                    mv $sample_dir/$bname.fastq_joined $sample_dir/${bname}_R2.fastq
+                else
+                    # Rename singular dumped sra file
+                    mv $sample_dir/*R1*.fastq $sample_dir/${bname}_R1.fastq
+                    mv $sample_dir/*R2*.fastq $sample_dir/${bname}_R2.fastq
+                fi  
+            fi  
+            # Make single file, unzipping simultaneously if they are zipped
+            if ls $sample_dir/*.gz &> /dev/null; then 
+                # for first set of reads
+                zcat $sample_dir/*R1*.gz > $sample_dir/${bname}_R1.fastq
+                # for second set of reads
+                zcat $sample_dir/*R2*.gz > $sample_dir/${bname}_R2.fastq
+            fi  
         fi  
-        # else, only one .fastq; will be used.
     else
-        # If there are any .sra files, dump to .fastq
-        if ls $sample_dir/*.sra &> /dev/null; then 
-            for sra in $sample_dir/*.sra
-                do  
-                    current_dir=`pwd`
-                    # CD in so that fastq-dump works correctly
-                    cd $sample_dir
-                    fastq-dump $sra
-                    rm $sra
-                    cd $current_dir
-                done
-            # Then compile all the .fastq
+        # for single end sequencing
+        if ls $sample_dir/*.fastq &> /dev/null; then
             if [ `ls -l $sample_dir/*.fastq | wc -l` -ne 1 ]; then
                 cat $sample_dir/*.fastq > $sample_dir/$bname.fastq_joined
                 rm $sample_dir/*.fastq
                 mv $sample_dir/$bname.fastq_joined $sample_dir/$bname.fastq
-            else
-                # Rename singular dumped sra file
-                mv $sample_dir/*.fastq $sample_dir/$bname.fastq
+            fi  
+            # else, only one .fastq; will be used.
+        else
+            # If there are any .sra files, dump to .fastq
+            if ls $sample_dir/*.sra &> /dev/null; then 
+                for sra in $sample_dir/*.sra
+                    do  
+                        current_dir=`pwd`
+                        # CD in so that fastq-dump works correctly
+                        cd $sample_dir
+                        fastq-dump $sra
+                        rm $sra
+                        cd $current_dir
+                    done
+                # Then compile all the .fastq
+                if [ `ls -l $sample_dir/*.fastq | wc -l` -ne 1 ]; then
+                    cat $sample_dir/*.fastq > $sample_dir/$bname.fastq_joined
+                    rm $sample_dir/*.fastq
+                    mv $sample_dir/$bname.fastq_joined $sample_dir/$bname.fastq
+                else
+                    # Rename singular dumped sra file
+                    mv $sample_dir/*.fastq $sample_dir/$bname.fastq
+                fi  
+            fi  
+            # Make single file, unzipping simultaneously if they are zipped
+            if ls $sample_dir/*.gz &> /dev/null; then 
+                zcat $sample_dir/*.gz > $sample_dir/$bname.fastq
             fi  
         fi  
-        # Make single file, unzipping simultaneously if they are zipped
-        if ls $sample_dir/*.gz &> /dev/null; then 
-            zcat $sample_dir/*.gz > $sample_dir/$bname.fastq
-        fi  
-    fi  
+    fi
 done
 
 # create output directories
