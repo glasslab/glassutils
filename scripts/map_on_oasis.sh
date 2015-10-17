@@ -335,7 +335,10 @@ then
     mkdir $outputDirectory/qsub_scripts
 else
     # delete existing scripts
-    rm $outputDirectory/qsub_scripts/*
+    if [ $(ls $outputDirectory/qsub_scripts/* |wc -l) -ne 0 ]
+    then
+        rm $outputDirectory/qsub_scripts/*
+    fi
 fi
 
 # make directory for sam files
@@ -374,11 +377,21 @@ codebase=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # generate script to map fastq to genome
 
 # find all fastq files
+echo "generating scripts"
 for sampleDir in ${sampleDirs[*]}
     do
-    fastqFile=$(readlink -fm $sampleDir/*fastq)
-    currentDirectory=${fastqFile%/*fastq}
-    sampleName=${fastqFile%.fastq}
+    if $paired
+    then
+        fastqFiles="$(readlink -fm $sampleDir/*R1*fastq) $(readlink -fm $sampleDir/*R2*fastq)"
+        fastqFile=$(readlink -fm $sampleDir/*R1*fastq)
+        currentDirectory=${fastqFile%/*R1*fastq}
+        sampleName=${fastqFile%_R1.fastq}
+    else
+        fastqFile=$(readlink -fm $sampleDir/*fastq)
+        fastqFiles=$fastqFiles
+        currentDirectory=${fastqFile%/*fastq}
+        sampleName=${fastqFile%.fastq}
+    fi
     sampleName=${sampleName##/*/} # remove preceding file path
     sampleName=${sampleName#Sample_} # remove "Sample_" from file names"
 
@@ -393,10 +406,14 @@ for sampleDir in ${sampleDirs[*]}
         logName="${sampleName}.${genome}.bowtie2.log" # remove path preceding file name
 
         # execute bowtie
+        if $paired
+        then
+            fastqFiles="-1 ${fastqFiles/ / -2 }"
+        fi
         command="$bowtie_path/bowtie2 \
 -p 8 \
 -x $bowtie_index_path/$genome \
-$fastqFile \
+$fastqFiles \
 > $outputDirectory/sam_files/$samName \
 2> $outputDirectory/log_files/$logName \n"
 
@@ -406,8 +423,12 @@ $fastqFile \
             command+="$homer_path/makeTagDirectory \
 $outputDirectory/tag_directories/$sampleName \
 -genome $genome \
--checkGC $outputDirectory/sam_files/$samName \
--format sam\n"
+-checkGC $outputDirectory/sam_files/$samName "
+        if $paired
+        then
+            command+="-sspe "
+        fi
+            command+="-format sam \n"
         fi
 
     ### RNA-seq ###
@@ -418,7 +439,7 @@ $outputDirectory/tag_directories/$sampleName \
         # execute star
         command="$star_path/STAR \
 --genomeDir $star_path/genomes/$genome \
---readFilesIn $fastqFile \
+--readFilesIn $fastqFiles \
 --outFileNamePrefix $currentDirectory/ \
 --runThreadN 4\n"
         # rename aligned file
@@ -433,8 +454,13 @@ $outputDirectory/log_files/$logName\n"
         command+="$homer_path/makeTagDirectory \
 $outputDirectory/tag_directories/${sampleName} \
 -genome $genome \
--checkGC $outputDirectory/sam_files/$samName \
--format sam -flip\n"
+-checkGC $outputDirectory/sam_files/$samName "
+        if $paired
+        then
+            command+="-sspe "
+        fi
+        
+        command+="-format sam -flip\n"
         fi
     ### ATAC-seq ###
     elif [ $experimentType == "atac" ]
@@ -442,10 +468,14 @@ $outputDirectory/tag_directories/${sampleName} \
         samName="${sampleName}.${genome}.bowtie2.sam" # change extension to sam
         logName="${sampleName}.${genome}.bowtie2.log" # remove path preceding file name
         # execute bowtie
+        if $paired
+        then
+            fastqFiles="-1 ${fastqFiles/ / -2 }"
+        fi
         command="$bowtie_path/bowtie2 \
 -p 8 \
 -x $bowtie_index_path/$genome \
-$fastqFile \
+$fastqFiles \
 > $outputDirectory/sam_files/$samName \
 2> $outputDirectory/log_files/$logName \n"
         # create tag directory
@@ -454,8 +484,12 @@ $fastqFile \
         command+="$homer_path/makeTagDirectory \
 $outputDirectory/tag_directories/${sampleName}_with_M \
 -genome $genome \
--checkGC $outputDirectory/sam_files/$samName \
--format sam\n"
+-checkGC $outputDirectory/sam_files/$samName "
+        if $paired
+        then
+            command+="-sspe "
+        fi
+        command+="-format sam\n"
         # remove contaminating tags from chromosome M
         command+="rm $outputDirectory/tag_directories/${sampleName}_with_M/chrM.tags.tsv\n"
         # remake tag directory
