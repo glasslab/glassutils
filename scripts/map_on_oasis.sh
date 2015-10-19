@@ -388,7 +388,7 @@ for sampleDir in ${sampleDirs[*]}
         sampleName=${fastqFile%_R1.fastq}
     else
         fastqFile=$(readlink -fm $sampleDir/*fastq)
-        fastqFiles=$fastqFiles
+        fastqFiles=$fastqFile
         currentDirectory=${fastqFile%/*fastq}
         sampleName=${fastqFile%.fastq}
     fi
