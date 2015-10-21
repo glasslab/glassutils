@@ -404,6 +404,10 @@ for sampleDir in ${sampleDirs[*]}
     then
         samName="${sampleName}.${genome}.bowtie2.sam" # change extension to sam
         logName="${sampleName}.${genome}.bowtie2.log" # remove path preceding file name
+        if [ -f $outputDirectory/log_files/$logName ]
+        then
+            rm $outputDirectory/log_files/$logName
+        fi
 
         # execute bowtie
         if $paired
@@ -436,6 +440,10 @@ $outputDirectory/tag_directories/$sampleName \
     then
         samName="${sampleName}.${genome}.star.sam" # change extension to sam
         logName="${sampleName}.${genome}.star.log" # remove path preceding file name
+        if [ -f $outputDirectory/log_files/$logName ]
+        then
+            rm $outputDirectory/log_files/$logName
+        fi
         # execute star
         command="$star_path/STAR \
 --genomeDir $star_path/genomes/$genome \
@@ -467,6 +475,10 @@ $outputDirectory/tag_directories/${sampleName} \
     then
         samName="${sampleName}.${genome}.bowtie2.sam" # change extension to sam
         logName="${sampleName}.${genome}.bowtie2.log" # remove path preceding file name
+        if [ -f $outputDirectory/log_files/$logName ]
+        then
+            rm $outputDirectory/log_files/$logName
+        fi
         # execute bowtie
         if $paired
         then
