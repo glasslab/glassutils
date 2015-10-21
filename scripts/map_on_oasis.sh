@@ -523,16 +523,19 @@ $outputDirectory/tag_directories/${sampleName}/tagInfo_with_M.txt\n"
 
     # calculate PBC coefficient
 
-    uniqueFile=$outputDirectory/pbc/${sampleName}.unique.bam
-    sortedFile=$outputDirectory/pbc/${sampleName}.sorted
-    pileupFile=$outputDirectory/pbc/${sampleName}.pileup
+    if [ "$experimentType" == "atac" ] || [ "$experimentType" == "chip" ]
+    then
+        uniqueFile=$outputDirectory/pbc/${sampleName}.unique.bam
+        sortedFile=$outputDirectory/pbc/${sampleName}.sorted
+        pileupFile=$outputDirectory/pbc/${sampleName}.pileup
 
-    command+="samtools view -Sbq 1 $outputDirectory/sam_files/$samName > \
-$uniqueFile\n"
-    command+="samtools sort $uniqueFile $sortedFile\n"
-    command+="samtools mpileup ${sortedFile}.bam > $pileupFile\n"
-    command+="PBC=\$(awk 'BEGIN {N1=0;ND=0} {if(\$4==1){N1+=1} ND+=1} END{print N1/ND}' ${pileupFile})\n"
-    command+="echo -e \"PBC    \$PBC\" >>$outputDirectory/log_files/$logName\n" #"
+        command+="samtools view -Sbq 1 $outputDirectory/sam_files/$samName > \
+    $uniqueFile\n"
+        command+="samtools sort $uniqueFile $sortedFile\n"
+        command+="samtools mpileup ${sortedFile}.bam > $pileupFile\n"
+        command+="PBC=\$(awk 'BEGIN {N1=0;ND=0} {if(\$4==1){N1+=1} ND+=1} END{print N1/ND}' ${pileupFile})\n"
+        command+="echo -e \"PBC    \$PBC\" >>$outputDirectory/log_files/$logName\n" #"
+    fi
 
     
     # copy files to Glassome scratch directory
