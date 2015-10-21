@@ -588,6 +588,7 @@ $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
         then
         echo "Submitting job for $sampleName"
         qsub $outputDirectory/qsub_scripts/${sampleName}.torque.sh
+        chmod a+r outputDirectory/qsub_scripts/*
     fi
 done
 
