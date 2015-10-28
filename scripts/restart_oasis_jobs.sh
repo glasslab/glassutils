@@ -27,6 +27,13 @@ fi
 
 directory=$1
 
+if [ ! -d $directory ]
+then
+    # directory does not exist - must be a directory on Glassome
+    inputDirectory=$(readlink -fm ${glassome_path}/${directory/data//})
+    directory="/oasis/tscc/scratch/$USER/${inputDirectory##*/}"
+fi
+
 for tagDir in $directory/tag_directories/*
 do
     if [ $(ls $tagDir|wc -l) -lt 20 ]
