@@ -197,6 +197,17 @@ else
     outputDirectory=$inputDirectory
 fi
 
+# create separate directory for each sample
+for f in $outputDirectory/*fastq.gz;
+do
+    dirname=${outputDirectory/_L0*.fastq.gz}
+    if [ ! -d $dirname ]
+    then
+        mkdir $dirname
+    fi
+    mv $f $dirname
+done
+
 ### decompress fastq.gz files
 
 echo "Decompressing raw data (fastq.gz files)"
@@ -206,12 +217,14 @@ compressedDirs=()
 echo $outputDirectory
 compressedPaths_1=( $(find $outputDirectory -path "*fastq.gz" -type f) )
 compressedPaths_2=( $(find $outputDirectory -path "*sra" -type f) )
-compressedPaths=( ${compressedPaths_1[@]} ${compressedPaths_2[@]} )
+compressedPaths_3=( $(find $outputDirectory -path "*fastq" -type f) )
+compressedPaths=( ${compressedPaths_1[@]} ${compressedPaths_2[@]} ${compressedPaths_3[@]})
 for f in ${compressedPaths[*]}
 do
     # remove file name to get sample directory
     compressedDir=${f%/*gz}
     compressedDir=${compressedDir%/*sra}
+    compressedDir=${compressedDir%/*fastq}
     # append sample directory to list
     compressedDirs[${#compressedDirs[*]}]=$compressedDir
 done
@@ -563,6 +576,7 @@ $outputDirectory/tag_directories/$sampleName\n"
 #PBS -l walltime=4:00:00
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
 #PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
+#PBS -M n 
 #PBS -V
 #PBS -m abe
 #PBS -A glass-group
@@ -588,7 +602,7 @@ $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
         then
         echo "Submitting job for $sampleName"
         qsub $outputDirectory/qsub_scripts/${sampleName}.torque.sh
-        chmod a+r outputDirectory/qsub_scripts/*
+        chmod a+r $outputDirectory/qsub_scripts/*
     fi
 done
 
