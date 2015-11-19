@@ -198,15 +198,19 @@ else
 fi
 
 # create separate directory for each sample
-for f in $outputDirectory/*fastq.gz;
-do
-    dirname=${outputDirectory/_L0*.fastq.gz}
-    if [ ! -d $dirname ]
-    then
-        mkdir $dirname
-    fi
-    mv $f $dirname
-done
+if [ $(ls $outputDirectory/*fastq.gz| wc -l) -gt 0 ]
+then
+    for f in $outputDirectory/*fastq.gz;
+    do
+        dirname=${f/_S[0-9][0-9]*_L0*.fastq.gz}
+        dirname=${dirname/.fastq.gz} # for older data without lane number
+        if [ ! -d $dirname ]
+        then
+            mkdir $dirname
+        fi
+        mv $f $dirname
+    done
+fi
 
 ### decompress fastq.gz files
 
