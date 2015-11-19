@@ -595,8 +595,8 @@ ${glassomeOutputDirectory}\n"
     echo -e "#!/bin/bash
 #PBS -q hotel
 #PBS -N ${sampleName}_${experimentType}_${genome}
-#PBS -l nodes=1:ppn=8
-#PBS -l walltime=4:00:00
+#PBS -l nodes=1:ppn=12
+#PBS -l walltime=2:00:00
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
 #PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
 #PBS -M n 
@@ -608,8 +608,8 @@ $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
     echo -e "#!/bin/bash
 #PBS -q hotel
 #PBS -N ${sampleName}_${experimentType}_${genome}
-#PBS -l nodes=1:ppn=8
-#PBS -l walltime=4:00:00
+#PBS -l nodes=1:ppn=12
+#PBS -l walltime=2:00:00
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
 #PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
 #PBS -M $email
