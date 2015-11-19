@@ -445,10 +445,10 @@ $fastqFiles \
 $outputDirectory/tag_directories/$sampleName \
 -genome $genome \
 -checkGC $outputDirectory/sam_files/$samName "
-        if $paired
-        then
-            command+="-sspe "
-        fi
+            if $paired
+            then
+                command+="-sspe "
+            fi
             command+="-format sam \n"
         fi
 
@@ -561,11 +561,15 @@ $outputDirectory/tag_directories/${sampleName}/tagInfo_with_M.txt\n"
 $glassomeOutputDirectory/log_files\n"
     if ! $map_only
     then
-        command+="cp -r $outputDirectory/tag_directories/$sampleName \
-$glassomeOutputDirectory/tag_directories\n"
-    # copy log file to tag directory
+        # copy log file to tag directory
         command+="cp $outputDirectory/log_files/$logName \
 $outputDirectory/tag_directories/$sampleName\n"
+        command+="cp -r $outputDirectory/tag_directories/$sampleName \
+$glassomeOutputDirectory/tag_directories\n"
+    else
+        command+="cp $outputDirectory/sam_files/$samName \
+${glassomeOutputDirectory}\n"
+
     fi
     
 
