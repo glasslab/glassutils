@@ -33,6 +33,7 @@ testing=false
 map_only=false
 no_emails=false
 paired=false
+copy_sam=true
 glassome_path='/projects/ps-glasslab-data/'
 mappingScripts_path='/projects/ps-glasslab-bioinformatics/glassutils/mapping_scripts/'
 bowtie_index_path='/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes/'
@@ -52,6 +53,7 @@ then
 -t    generate qsub scripts but do not execute them
 -m    only map files - do not create tag directories
 -e    do not send email notifications
+-s    copy sam files to Glassome
 -p    input data is paired end"
     exit 1
 fi
@@ -69,12 +71,16 @@ while getopts "ltmep" option ; do # set $o to the next passed option
     ;;  
     m)  
         map_only=true
+        copy_sam=true
     ;;  
     e)  
         no_emails=true
     ;;  
     p)  
         paired=true
+    ;;  
+    s)  
+        copy_sam=true
     ;;  
     esac
 done
@@ -102,7 +108,13 @@ fi
 
 if $map_only
 then
-    echo "You are using the map only option - tag directories won't be created"
+    echo "You are using the map only option - tag directories won't be created
+ but sam files will be copied to Glassome"
+fi
+
+if $copy_sam
+then
+    echo "Sam files will be copied to Glassome"
 fi
 
 if $testing
@@ -566,11 +578,14 @@ $glassomeOutputDirectory/log_files\n"
 $outputDirectory/tag_directories/$sampleName\n"
         command+="cp -r $outputDirectory/tag_directories/$sampleName \
 $glassomeOutputDirectory/tag_directories\n"
-    else
+    fi
+
+    if $copy_sam
+    then
         command+="cp $outputDirectory/sam_files/$samName \
 ${glassomeOutputDirectory}\n"
-
     fi
+
     
 
 
