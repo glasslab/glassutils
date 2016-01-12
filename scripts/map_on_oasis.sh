@@ -33,7 +33,7 @@ testing=false
 map_only=false
 no_emails=false
 paired=false
-copy_sam=true
+copy_sam=false
 glassome_path='/projects/ps-glasslab-data/'
 mappingScripts_path='/projects/ps-glasslab-bioinformatics/glassutils/mapping_scripts/'
 bowtie_index_path='/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes/'
@@ -215,6 +215,7 @@ then
     for f in $outputDirectory/*fastq.gz;
     do
         dirname=${f/_S[0-9][0-9]*_L0*.fastq.gz}
+        dirname=${dirname/_S[0-9][0-9]*.fastq.gz}
         dirname=${dirname/.fastq.gz} # for older data without lane number
         if [ ! -d $dirname ]
         then
@@ -224,7 +225,39 @@ then
     done
 fi
 
-### decompress fastq.gz files
+
+if [ $(ls $outputDirectory/*fastq| wc -l) -gt 0 ]
+then
+    for f in $outputDirectory/*fastq;
+    do
+        dirname=${f/_S[0-9][0-9]*_L0*.fastq}
+        dirname=${dirname/_S[0-9][0-9]*.fastq}
+        dirname=${dirname/.fastq} # for older data without lane number
+        if [ ! -d $dirname ]
+        then
+            mkdir $dirname
+        fi
+        mv $f $dirname
+    done
+fi
+
+
+if [ $(ls $outputDirectory/*sra| wc -l) -gt 0 ]
+then
+    for f in $outputDirectory/*sra;
+    do
+        dirname=${f/_S[0-9][0-9]*_L0*.sra}
+        dirname=${dirname/_S[0-9][0-9]*.sra}
+        dirname=${dirname/.sra} # for older data without lane number
+        if [ ! -d $dirname ]
+        then
+            mkdir $dirname
+        fi
+        mv $f $dirname
+    done
+fi
+
+### decompress files
 
 echo "Decompressing raw data (fastq.gz files)"
 
@@ -479,6 +512,13 @@ $outputDirectory/tag_directories/$sampleName \
 --readFilesIn $fastqFiles \
 --outFileNamePrefix $currentDirectory/ \
 --runThreadN 4\n"
+#        command="$star_path/STAR \
+#--genomeDir $star_path/genomes/$genome \
+#--readFilesIn $fastqFiles \
+#--outFileNamePrefix $currentDirectory/ \
+#--outFilterMatchNminOverLread 0.40 \
+#--outFilterScoreMinOverLread 0.40 \
+#--runThreadN 4\n"
         # rename aligned file
         command+="mv $currentDirectory/Aligned.out.sam \
 $outputDirectory/sam_files/$samName\n"
