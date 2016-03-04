@@ -92,11 +92,11 @@ if __name__ == '__main__':
         if experimentType == 'rna':
             totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readStarLog(td + '/' + logFile)
         elif experimentType == 'chip':
-            pass
+            totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readBowtieLog(td + '/' + logFile)
         elif experimentType == 'atac':
-            pass
+            totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readBowtieLog(td + '/' + logFile)
         elif experimentType == 'gro':
-            totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readStarLog(td + '/' + logFile)
+            totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readBowtieLog(td + '/' + logFile)
         else:
             pass
         _genome.append(genome)
@@ -157,6 +157,10 @@ if __name__ == '__main__':
 
     sns.factorplot(data=stat_frame, y='clonality', kind='box')
     plt.savefig('clonality_boxplot.pdf')
+    plt.close()
+
+    sns.factorplot(data=stat_frame, y='uniquelyMappedReads', kind='box')
+    plt.savefig('uniquelyMappedReads_boxplot.pdf')
     plt.close()
 
     sns.factorplot(data=stat_frame, y='uniquelyMappedFraction', kind='box')
