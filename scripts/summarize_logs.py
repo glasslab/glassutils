@@ -57,13 +57,16 @@ if __name__ == '__main__':
     ### check that there are sufficient number of arguments ###
     if len(sys.argv) < 4:
         print("Usage:")
-        print("python summarize_logs.py <rna|chip|atac|gro>> <output_directory> <tagDir1> ..<tagDirN>")
+        print("summarize_logs.py <rna|chip|atac|gro>> <output_directory> <tagDir1> ..<tagDirN>")
         sys.exit(1)
 
     ### parse arguments ###
     experimentType = sys.argv[1].lower()
     output_directory = sys.argv[2]
     input_directories = sys.argv[3:]
+    
+    if not os.path.isdir(output_directory):
+        os.mkdirs(output_directory)
 
     # intitialize arrays
     _genome= []
@@ -148,29 +151,29 @@ if __name__ == '__main__':
 
     ### create plots ###
     sns.factorplot(data=stat_frame, y='clonality', kind='box')
-    plt.savefig('clonality_boxplot.pdf')
+    plt.savefig(output_directory + '/clonality_boxplot.pdf')
     plt.close()
 
     sns.factorplot(data=stat_frame, y='GC Content', kind='box')
-    plt.savefig('GC_Content_boxplot.pdf')
+    plt.savefig(output_directory + '/GC_Content_boxplot.pdf')
     plt.close()
 
     sns.factorplot(data=stat_frame, y='clonality', kind='box')
-    plt.savefig('clonality_boxplot.pdf')
+    plt.savefig(output_directory + '/clonality_boxplot.pdf')
     plt.close()
 
     sns.factorplot(data=stat_frame, y='uniquelyMappedReads', kind='box')
-    plt.savefig('uniquelyMappedReads_boxplot.pdf')
+    plt.savefig(output_directory + '/uniquelyMappedReads_boxplot.pdf')
     plt.close()
 
     sns.factorplot(data=stat_frame, y='uniquelyMappedFraction', kind='box')
-    plt.savefig('uniquelyMappedFraction_boxplot.pdf')
+    plt.savefig(output_directory + '/uniquelyMappedFraction_boxplot.pdf')
     plt.close()
 
     sns.factorplot(data=stat_frame, y='mappedFraction', kind='box')
-    plt.savefig('mappedFraction_boxplot.pdf')
+    plt.savefig(output_directory + '/mappedFraction_boxplot.pdf')
     plt.close()
 
     sns.regplot(data=stat_frame, x='totalReads', y='uniquelyMappedReads')
-    plt.savefig('sequencingDepth.pdf')
+    plt.savefig(output_directory + '/sequencingDepth.pdf')
     plt.close()
