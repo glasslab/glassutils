@@ -216,6 +216,7 @@ then
     do
         dirname=${f/_S[0-9][0-9]*_L0*.fastq.gz}
         dirname=${dirname/_S[0-9][0-9]*.fastq.gz}
+        dirname=${dirname/_S[0-9]*.fastq.gz}
         dirname=${dirname/.fastq.gz} # for older data without lane number
         if [ ! -d $dirname ]
         then
@@ -232,6 +233,7 @@ then
     do
         dirname=${f/_S[0-9][0-9]*_L0*.fastq}
         dirname=${dirname/_S[0-9][0-9]*.fastq}
+        dirname=${dirname/_S[0-9]*.fastq}
         dirname=${dirname/.fastq} # for older data without lane number
         if [ ! -d $dirname ]
         then
@@ -248,6 +250,7 @@ then
     do
         dirname=${f/_S[0-9][0-9]*_L0*.sra}
         dirname=${dirname/_S[0-9][0-9]*.sra}
+        dirname=${dirname/_S[0-9]*.sra}
         dirname=${dirname/.sra} # for older data without lane number
         if [ ! -d $dirname ]
         then
@@ -634,9 +637,9 @@ ${glassomeOutputDirectory}\n"
     then
     echo -e "#!/bin/bash
 #PBS -q hotel
-#PBS -N ${sampleName}_${experimentType}_${genome}
+#PBS -N ${sampleName}
 #PBS -l nodes=1:ppn=12
-#PBS -l walltime=2:00:00
+#PBS -l walltime=1:00:00
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
 #PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
 #PBS -M n 
@@ -647,9 +650,9 @@ $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
     else
     echo -e "#!/bin/bash
 #PBS -q hotel
-#PBS -N ${sampleName}_${experimentType}_${genome}
+#PBS -N ${sampleName}
 #PBS -l nodes=1:ppn=12
-#PBS -l walltime=2:00:00
+#PBS -l walltime=1:00:00
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
 #PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
 #PBS -M $email
