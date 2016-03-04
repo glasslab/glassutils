@@ -36,11 +36,11 @@ paired=false
 copy_sam=false
 glassome_path='/projects/ps-glasslab-data/'
 mappingScripts_path='/projects/ps-glasslab-bioinformatics/glassutils/mapping_scripts/'
+scripts_path='/projects/ps-glasslab-bioinformatics/glassutils/scripts/'
 bowtie_index_path='/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes/'
 star_path='/projects/ps-glasslab-bioinformatics/software/STAR/'
 bowtie_path='/projects/glass-group/bioinformatics/bowtie2'
 homer_path='/projects/glass-group/bioinformatics/homer/bin/'
-#homer_path='/projects/ps-glasslab-bioinformatics/homer/bin/'
 
 # check number of arguments
 if [ $# -lt 4 ] 
