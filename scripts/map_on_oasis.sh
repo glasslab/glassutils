@@ -71,7 +71,6 @@ while getopts "ltmep" option ; do # set $o to the next passed option
     ;;  
     m)  
         map_only=true
-        copy_sam=true
     ;;  
     e)  
         no_emails=true
@@ -109,7 +108,8 @@ fi
 if $map_only
 then
     echo "You are using the map only option - tag directories won't be created
- but sam files will be copied to Glassome"
+ but sam files will be created on TSCC. Specify the -s option to copy sam files
+to Glassome"
 fi
 
 if $copy_sam
