@@ -61,7 +61,7 @@ fi
 ### parse the input ###
 
 OPTIND=5
-while getopts "ltmep" option ; do # set $o to the next passed option
+while getopts "ltmeps" option ; do # set $o to the next passed option
     case "$option" in  
     l)  
        map_local_files=true 
