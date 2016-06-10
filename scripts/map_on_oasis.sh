@@ -41,6 +41,7 @@ bowtie_index_path='/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes
 star_path='/projects/ps-glasslab-bioinformatics/software/STAR/'
 bowtie_path='/projects/glass-group/bioinformatics/bowtie2'
 homer_path='/projects/glass-group/bioinformatics/homer/bin/'
+flip=true
 
 # check number of arguments
 if [ $# -lt 4 ] 
@@ -54,14 +55,15 @@ then
 -m    only map files - do not create tag directories
 -e    do not send email notifications
 -s    copy sam files to Glassome
--p    input data is paired end"
+-p    input data is paired end
+-f    do not use the -flip option when making RNA tag directories"
     exit 1
 fi
 
 ### parse the input ###
 
 OPTIND=5
-while getopts "ltmeps" option ; do # set $o to the next passed option
+while getopts "ltmepsf" option ; do # set $o to the next passed option
     case "$option" in  
     l)  
        map_local_files=true 
@@ -80,6 +82,9 @@ while getopts "ltmeps" option ; do # set $o to the next passed option
     ;;  
     s)  
         copy_sam=true
+    ;;  
+    f)  
+        flip=false
     ;;  
     esac
 done
@@ -515,13 +520,6 @@ $outputDirectory/tag_directories/$sampleName \
 --readFilesIn $fastqFiles \
 --outFileNamePrefix $currentDirectory/ \
 --runThreadN 4\n"
-#        command="$star_path/STAR \
-#--genomeDir $star_path/genomes/$genome \
-#--readFilesIn $fastqFiles \
-#--outFileNamePrefix $currentDirectory/ \
-#--outFilterMatchNminOverLread 0.40 \
-#--outFilterScoreMinOverLread 0.40 \
-#--runThreadN 4\n"
         # rename aligned file
         command+="mv $currentDirectory/Aligned.out.sam \
 $outputDirectory/sam_files/$samName\n"
@@ -531,16 +529,20 @@ $outputDirectory/log_files/$logName\n"
         # create tag directory
         if ! $map_only
         then
-        command+="$homer_path/makeTagDirectory \
+            command+="$homer_path/makeTagDirectory \
 $outputDirectory/tag_directories/${sampleName} \
 -genome $genome \
 -checkGC $outputDirectory/sam_files/$samName "
-        if $paired
-        then
-            command+="-sspe "
-        fi
-        
-        command+="-format sam -flip\n"
+            if $paired
+            then
+                command+="-sspe "
+            fi
+            if $flip         
+            then
+                command+="-format sam -flip\n"
+            else
+                command+="-format sam\n"
+            fi
         fi
     ### ATAC-seq ###
     elif [ $experimentType == "atac" ]
