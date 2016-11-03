@@ -22,29 +22,41 @@ import matplotlib.pyplot as plt
 import fnmatch
 import seaborn as sns 
 
+
 ### functions ###
 def readTagInfoFile(filePath):
     with open(filePath) as f:
         data = f.readlines()
-    genome = data[1].split()[0].split('=')[1]
+    if '=' in data[1]:
+        genome = data[1].split()[0].split('=')[1]
+    else:
+        genome = 'unknown'
     uniquePositions  =  int(data[1].split()[1])
+    totalReads=  float(data[1].split()[2])
     fragmentLengthEstimate = float(data[2].split('=')[1])
     tagsPerBP = float(data[4].split('=')[1])
     averageTagsPerPosition = float(data[5].split('=')[1])
     averageTagLength = float(data[6].split('=')[1])
     averageFragmentGCcontent = float(data[8].split('=')[1])
-    return genome, uniquePositions, fragmentLengthEstimate, tagsPerBP, averageTagsPerPosition, averageTagLength, averageFragmentGCcontent
+    return genome, uniquePositions, totalReads, fragmentLengthEstimate, tagsPerBP, averageTagsPerPosition, averageTagLength, averageFragmentGCcontent
 
 def readStarLog(filePath):
+    print('Reading log file: ' + filePath)
     with open(filePath) as f:
         data = f.readlines()
-    totalReads = int(data[5].split()[5])
-    uniquelyMappedReads = int(data[8].split()[5])
-    multiMappedReads = int(data[23].split()[8])
+    if len(data[5].split()) > 5:
+        totalReads = int(data[5].split()[5])
+        uniquelyMappedReads = int(data[8].split()[5])
+        multiMappedReads = int(data[23].split()[8])
+    else:
+        totalReads = int(data[8].split()[5])
+        uniquelyMappedReads = int(data[11].split()[5])
+        multiMappedReads = int(data[26].split()[8])
     unmappedReads = totalReads - uniquelyMappedReads - multiMappedReads
     return totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads
 
 def readBowtieLog(filePath):
+    print('Reading log file: ' + filePath)
     with open(filePath) as f:
         data = f.readlines()
     totalReads = float(data[0].split()[0])
@@ -65,8 +77,11 @@ if __name__ == '__main__':
     output_directory = sys.argv[2]
     input_directories = sys.argv[3:]
     
+    # create output directory if it does not exist
     if not os.path.isdir(output_directory):
-        os.mkdirs(output_directory)
+        os.makedirs(output_directory)
+
+    allHasLog = True
 
     # intitialize arrays
     _genome= []
@@ -84,35 +99,51 @@ if __name__ == '__main__':
     # for each tag directory
     for td in input_directories:
         ### read tag info file ###
-        _sampleNames.append(td.split('/')[-1])
-        genome, uniquePositions, fragmentLengthEstimate, tagsPerBP, averageTagsPerPosition, averageTagLength, averageFragmentGCcontent = readTagInfoFile(td + '/tagInfo.txt')
-        for f in os.listdir(td):
-            if fnmatch.fnmatch(f, '*.log'):
-                logFile = f
-                break
-            
-        ### read in mapping log file
-        if experimentType == 'rna':
-            totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readStarLog(td + '/' + logFile)
-        elif experimentType == 'chip':
-            totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readBowtieLog(td + '/' + logFile)
-        elif experimentType == 'atac':
-            totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readBowtieLog(td + '/' + logFile)
-        elif experimentType == 'gro':
-            totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readBowtieLog(td + '/' + logFile)
+        if os.path.isdir(td) and os.path.isfile(td + '/tagInfo.txt'):
+            sn = td.split('/')[-1]
+            if len(sn) < 1:
+                sn=td.split('/')[-2]
+            _sampleNames.append(sn)
+            genome, uniquePositions, totalReads, fragmentLengthEstimate, tagsPerBP, averageTagsPerPosition, averageTagLength, averageFragmentGCcontent = readTagInfoFile(td + '/tagInfo.txt')
+            logFile = None
+            for f in os.listdir(td):
+                if fnmatch.fnmatch(f, '*.log'):
+                    logFile = f
+                    break
+                
+            ### read in mapping log file
+            if logFile:
+                if experimentType == 'rna':
+                    totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readStarLog(td + '/' + logFile)
+                elif experimentType == 'chip':
+                    totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readBowtieLog(td + '/' + logFile)
+                elif experimentType == 'atac':
+                    totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readBowtieLog(td + '/' + logFile)
+                elif experimentType == 'gro':
+                    totalReads, uniquelyMappedReads, multiMappedReads, unmappedReads = readBowtieLog(td + '/' + logFile)
+                else:
+                    pass
+                _uniquelyMappedReads.append(uniquelyMappedReads)
+                _multiMappedReads.append(multiMappedReads)
+                _unmappedReads.append(unmappedReads)
+            else:
+                allHasLog = False
+                # insert null values
+                _uniquelyMappedReads.append(-1)
+                _multiMappedReads.append(-1)
+                _unmappedReads.append(-1)
+
+            _totalReads.append(totalReads)
+            _uniquePositions.append(uniquePositions)
+            _fragmentLengthEstimate.append(fragmentLengthEstimate)
+            _tagsPerBP.append(tagsPerBP)
+            _averageTagsPerPosition.append(averageTagsPerPosition)
+            _averageTagLength.append(averageTagLength)
+            _averageFragmentGCcontent.append(averageFragmentGCcontent)
+            _genome.append(genome)
         else:
-            pass
-        _genome.append(genome)
-        _uniquePositions.append(uniquePositions)
-        _fragmentLengthEstimate.append(fragmentLengthEstimate)
-        _tagsPerBP.append(tagsPerBP)
-        _averageTagsPerPosition.append(averageTagsPerPosition)
-        _averageTagLength.append(averageTagLength)
-        _averageFragmentGCcontent.append(averageFragmentGCcontent)
-        _totalReads.append(totalReads)
-        _uniquelyMappedReads.append(uniquelyMappedReads)
-        _multiMappedReads.append(multiMappedReads)
-        _unmappedReads.append(unmappedReads)
+            print(td + ' was not included in summary because it was either not a directory or did not contain a tagInfo.txt file')
+            
 
     
     ### create data frame ####
@@ -147,33 +178,62 @@ if __name__ == '__main__':
         ]]
     stat_frame['uniquelyMappedFraction'] = stat_frame['uniquelyMappedReads'] / stat_frame['totalReads']
     stat_frame['mappedFraction'] = (stat_frame['uniquelyMappedReads'] + stat_frame['multiMappedReads']) / stat_frame['totalReads']
-    stat_frame.to_csv(output_directory + '/mapping_stats.tsv',sep='\t', index=False)
+    # create plots that depend on mapping log file
 
-    ### create plots ###
-    sns.factorplot(data=stat_frame, y='clonality', kind='box')
-    plt.savefig(output_directory + '/clonality_boxplot.pdf')
-    plt.close()
-
-    sns.factorplot(data=stat_frame, y='GC Content', kind='box')
-    plt.savefig(output_directory + '/GC_Content_boxplot.pdf')
-    plt.close()
-
-    sns.factorplot(data=stat_frame, y='clonality', kind='box')
-    plt.savefig(output_directory + '/clonality_boxplot.pdf')
-    plt.close()
-
-    sns.factorplot(data=stat_frame, y='uniquelyMappedReads', kind='box')
+    sns.factorplot(data = stat_frame, y = 'uniquelyMappedReads', kind='box')
     plt.savefig(output_directory + '/uniquelyMappedReads_boxplot.pdf')
     plt.close()
 
-    sns.factorplot(data=stat_frame, y='uniquelyMappedFraction', kind='box')
+    sns.factorplot(data = stat_frame, y = 'uniquelyMappedFraction', kind='box')
     plt.savefig(output_directory + '/uniquelyMappedFraction_boxplot.pdf')
     plt.close()
 
-    sns.factorplot(data=stat_frame, y='mappedFraction', kind='box')
+    sns.factorplot(data = stat_frame, y = 'mappedFraction', kind='box')
     plt.savefig(output_directory + '/mappedFraction_boxplot.pdf')
+    plt.close()
+
+    sns.distplot(stat_frame['uniquelyMappedReads'])
+    plt.savefig(output_directory + '/uniquelyMappedReads_distplot.pdf')
+    plt.close()
+
+    sns.distplot(stat_frame['uniquelyMappedFraction'])
+    plt.savefig(output_directory + '/uniquelyMappedFraction_distplot.pdf')
+    plt.close()
+
+    sns.distplot(stat_frame['mappedFraction'])
+    plt.savefig(output_directory + '/mappedFraction_distplot.pdf')
     plt.close()
 
     sns.regplot(data=stat_frame, x='totalReads', y='uniquelyMappedReads')
     plt.savefig(output_directory + '/sequencingDepth.pdf')
     plt.close()
+
+    stat_frame.to_csv(output_directory + '/mapping_stats.tsv',sep='\t', index=False)
+
+    ### create plots ###
+    sns.factorplot(data = stat_frame, y = 'clonality', kind='box')
+    plt.savefig(output_directory + '/clonality_boxplot.pdf')
+    plt.close()
+
+    sns.factorplot(data = stat_frame, y = 'GC Content', kind='box')
+    plt.savefig(output_directory + '/GC_Content_boxplot.pdf')
+    plt.close()
+
+    sns.factorplot(data = stat_frame, y = 'clonality', kind='box')
+    plt.savefig(output_directory + '/clonality_boxplot.pdf')
+    plt.close()
+
+
+    sns.distplot(stat_frame['clonality'])
+    plt.savefig(output_directory + '/clonality_distplot.pdf')
+    plt.close()
+
+    if np.min(stat_frame['GC Content'].values)> -1:
+        sns.distplot(stat_frame['GC Content'])
+        plt.savefig(output_directory + '/GC_Content_distplot.pdf')
+        plt.close()
+
+    sns.distplot(stat_frame['clonality'])
+    plt.savefig(output_directory + '/clonality_distplot.pdf')
+    plt.close()
+
