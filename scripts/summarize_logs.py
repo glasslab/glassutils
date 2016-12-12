@@ -178,62 +178,101 @@ if __name__ == '__main__':
         ]]
     stat_frame['uniquelyMappedFraction'] = stat_frame['uniquelyMappedReads'] / stat_frame['totalReads']
     stat_frame['mappedFraction'] = (stat_frame['uniquelyMappedReads'] + stat_frame['multiMappedReads']) / stat_frame['totalReads']
-    # create plots that depend on mapping log file
-
-    sns.factorplot(data = stat_frame, y = 'uniquelyMappedReads', kind='box')
-    plt.savefig(output_directory + '/uniquelyMappedReads_boxplot.pdf')
-    plt.close()
-
-    sns.factorplot(data = stat_frame, y = 'uniquelyMappedFraction', kind='box')
-    plt.savefig(output_directory + '/uniquelyMappedFraction_boxplot.pdf')
-    plt.close()
-
-    sns.factorplot(data = stat_frame, y = 'mappedFraction', kind='box')
-    plt.savefig(output_directory + '/mappedFraction_boxplot.pdf')
-    plt.close()
-
-    sns.distplot(stat_frame['uniquelyMappedReads'])
-    plt.savefig(output_directory + '/uniquelyMappedReads_distplot.pdf')
-    plt.close()
-
-    sns.distplot(stat_frame['uniquelyMappedFraction'])
-    plt.savefig(output_directory + '/uniquelyMappedFraction_distplot.pdf')
-    plt.close()
-
-    sns.distplot(stat_frame['mappedFraction'])
-    plt.savefig(output_directory + '/mappedFraction_distplot.pdf')
-    plt.close()
-
-    sns.regplot(data=stat_frame, x='totalReads', y='uniquelyMappedReads')
-    plt.savefig(output_directory + '/sequencingDepth.pdf')
-    plt.close()
 
     stat_frame.to_csv(output_directory + '/mapping_stats.tsv',sep='\t', index=False)
 
-    ### create plots ###
-    sns.factorplot(data = stat_frame, y = 'clonality', kind='box')
-    plt.savefig(output_directory + '/clonality_boxplot.pdf')
-    plt.close()
-
-    sns.factorplot(data = stat_frame, y = 'GC Content', kind='box')
-    plt.savefig(output_directory + '/GC_Content_boxplot.pdf')
-    plt.close()
-
-    sns.factorplot(data = stat_frame, y = 'clonality', kind='box')
-    plt.savefig(output_directory + '/clonality_boxplot.pdf')
-    plt.close()
-
-
-    sns.distplot(stat_frame['clonality'])
-    plt.savefig(output_directory + '/clonality_distplot.pdf')
-    plt.close()
-
-    if np.min(stat_frame['GC Content'].values)> -1:
-        sns.distplot(stat_frame['GC Content'])
-        plt.savefig(output_directory + '/GC_Content_distplot.pdf')
+    # create plots that depend on mapping log file
+    try:
+        sns.factorplot(data = stat_frame, y = 'uniquelyMappedReads', kind='box')
+        plt.savefig(output_directory + '/uniquelyMappedReads_boxplot.pdf')
         plt.close()
+    except Exception:
+        print('Could not create uniquelyMappedReads_boxplot.pdf')
 
-    sns.distplot(stat_frame['clonality'])
-    plt.savefig(output_directory + '/clonality_distplot.pdf')
-    plt.close()
+    try:
+        sns.factorplot(data = stat_frame, y = 'uniquelyMappedFraction', kind='box')
+        plt.savefig(output_directory + '/uniquelyMappedFraction_boxplot.pdf')
+        plt.close()
+    except Exception:
+        print('Could not create uniquelyMappedFraction_boxplot.pdf')
+
+    try:
+        sns.factorplot(data = stat_frame, y = 'mappedFraction', kind='box')
+        plt.savefig(output_directory + '/mappedFraction_boxplot.pdf')
+        plt.close()
+    except Exception:
+        print('Could not create mappedFraction_boxplot.pdf')
+
+    try:
+        sns.distplot(stat_frame['uniquelyMappedReads'])
+        plt.savefig(output_directory + '/uniquelyMappedReads_distplot.pdf')
+        plt.close()
+    except Exception:
+        print('Could not create uniquelyMappedReads_distplot.pdf')
+
+    try:
+        sns.distplot(stat_frame['uniquelyMappedFraction'])
+        plt.savefig(output_directory + '/uniquelyMappedFraction_distplot.pdf')
+        plt.close()
+    except Exception:
+        print('Could not create uniquelyMappedFraction_distplot.pdf')
+
+    try:
+        sns.distplot(stat_frame['mappedFraction'])
+        plt.savefig(output_directory + '/mappedFraction_distplot.pdf')
+        plt.close()
+    except Exception:
+        print('Could not create mappedFraction_distplot.pdf')
+
+    try:
+        sns.regplot(data=stat_frame, x='totalReads', y='uniquelyMappedReads')
+        plt.savefig(output_directory + '/sequencingDepth.pdf')
+        plt.close()
+    except Exception:
+        print('Could not create sequencingDepth.pdf')
+
+
+    ### create plots ###
+    try:
+        sns.factorplot(data = stat_frame, y = 'clonality', kind='box')
+        plt.savefig(output_directory + '/clonality_boxplot.pdf')
+        plt.close()
+    except:
+        print('Could not create clonality_boxplot.pdf')
+
+    try:
+        sns.factorplot(data = stat_frame, y = 'GC Content', kind='box')
+        plt.savefig(output_directory + '/GC_Content_boxplot.pdf')
+        plt.close()
+    except:
+        print('Could not create GC_Content_boxplot.pdf')
+
+    try:
+        sns.factorplot(data = stat_frame, y = 'clonality', kind='box')
+        plt.savefig(output_directory + '/clonality_boxplot.pdf')
+        plt.close()
+    except:
+        print('Could not create clonality_boxplot.pdf')
+
+    try:
+        sns.distplot(stat_frame['clonality'])
+        plt.savefig(output_directory + '/clonality_distplot.pdf')
+        plt.close()
+    except:
+        print('Could not create clonality_distplot.pdf')
+
+    try:
+        if np.min(stat_frame['GC Content'].values)> -1:
+            sns.distplot(stat_frame['GC Content'])
+            plt.savefig(output_directory + '/GC_Content_distplot.pdf')
+            plt.close()
+    except:
+        print('Could not create GC_Content_distplot.pdf')
+
+    try:
+        sns.distplot(stat_frame['clonality'])
+        plt.savefig(output_directory + '/clonality_distplot.pdf')
+        plt.close()
+    except:
+        print('Could not create clonality_distplot.pdf')
 
