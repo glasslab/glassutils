@@ -616,12 +616,12 @@ $outputDirectory/tag_directories/${sampleName}/tagInfo_with_M.txt\n"
     # copy files to Glassome scratch directory
     # copy log file
     command+="cp $outputDirectory/log_files/$logName \
-$glassomeOutputDirectory/log_files\n"
+$glassomeOutputDirectory/log_files/\n"
     if ! $map_only
     then
         # copy log file to tag directory
         command+="cp $outputDirectory/log_files/$logName \
-$outputDirectory/tag_directories/$sampleName\n"
+$outputDirectory/tag_directories/$sampleName/\n"
         command+="cp -r $outputDirectory/tag_directories/$sampleName \
 $glassomeOutputDirectory/tag_directories\n"
     fi
@@ -645,9 +645,8 @@ ${glassomeOutputDirectory}\n"
 #PBS -l walltime=2:00:00
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
 #PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
-#PBS -M n 
+#PBS -m n 
 #PBS -V
-#PBS -m abe
 #PBS -A glass-group
 $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
     else
