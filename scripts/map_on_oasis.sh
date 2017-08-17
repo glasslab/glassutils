@@ -520,7 +520,7 @@ $outputDirectory/tag_directories/$sampleName \
 --genomeDir $star_path/genomes/$genome \
 --readFilesIn $fastqFiles \
 --outFileNamePrefix $currentDirectory/ \
---runThreadN 4\n"
+--runThreadN 8\n"
         # rename aligned file
         command+="mv $currentDirectory/Aligned.out.sam \
 $outputDirectory/sam_files/$samName\n"
