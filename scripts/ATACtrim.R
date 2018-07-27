@@ -11,8 +11,9 @@ graphics.off()
 closeAllConnections()
 args <- commandArgs(trailingOnly=TRUE)
 if(length(args)<1){
-  cat("Trim ATAC primer ATCTCCGAGCCCACGAGAC\n")
-  cat("usage: /home/z5ouyang/src/ATACtrim.R /full/path/to/the/fastq/folder/\n")
+  cat("\n\nTrim ATAC primer ATCTCCGAGCCCACGAGAC\n")
+  cat("\tusage: ATACtrim.R /full/path/to/the/fastq/folder/\n")
+  cat("\teg: ATACtrim.R /full/path/to/the/fastq/folder/\n")
   q()
 }
 strPath <- args[1]
