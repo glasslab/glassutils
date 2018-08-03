@@ -13,7 +13,9 @@ args <- commandArgs(trailingOnly=TRUE)
 if(length(args)<1){
   cat("\n\nTrim ATAC primer ATCTCCGAGCCCACGAGAC\n")
   cat("\tusage: ATACtrim.R /full/path/to/the/fastq/folder/\n")
-  cat("\teg: ATACtrim.R /full/path/to/the/fastq/folder/\n")
+  cat("\teg: ATACtrim.R /data/archive/18-07-09-glass/AN/18-07-09-glass_cleveland_atac\n")
+  cat("\n\tResult: A folder named trimmed will be created in the folder and where all the trimed fastqs will be located\n")
+  cat("\n\n")
   q()
 }
 strPath <- args[1]
