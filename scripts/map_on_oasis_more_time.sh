@@ -35,7 +35,6 @@ no_emails=false
 paired=false
 copy_sam=false
 glassome_path='/projects/ps-glasslab-data/'
-scratch_path='/projects/ps-glasslab-scratch/'
 mappingScripts_path='/projects/ps-glasslab-bioinformatics/glassutils/mapping_scripts/'
 scripts_path='/projects/ps-glasslab-bioinformatics/glassutils/scripts/'
 bowtie_index_path='/projects/ps-glasslab-bioinformatics/software/bowtie2/indexes/'
@@ -172,22 +171,19 @@ fi
 ###
 
 # create directory where data will be stored on glassome
-#glassomeOutputDirectory="/projects/ps-glasslab-data/scratch/$USER/${inputDirectory##*/}"
-glassomeOutputDirectory="$scratch_path/$USER/${inputDirectory##*/}"
+glassomeOutputDirectory="/projects/ps-glasslab-data/scratch/$USER/${inputDirectory##*/}"
 if [ ! -d $glassomeOutputDirectory ]
 then
     mkdir -p $glassomeOutputDirectory
 else
-    read -p "This script will copy output files to $glassomeOutputDirectory,
-which already exists! Would you like to delete the existing tag directories,
-log files, and sam files located at $glassomeOutputDirectory?
-Enter y for yes and n for no [yn]" -n 1 -r 
+    read -p "This script will copy output files to $glassomeOutputDirectory, \
+which already exists! Would you like to delete it. \
+Enter y for yes and n for no [yn]?" -n 1 -r 
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
-        rm -rf $glassomeOutputDirectory/log_files/
-        rm -rf $glassomeOutputDirectory/sam_files/
-        rm -rf $glassomeOutputDirectory/tag_directories
+        rm -rf $glassomeOutputDirectory
+        mkdir -p $glassomeOutputDirectory
     fi
 fi
 
@@ -646,7 +642,7 @@ ${glassomeOutputDirectory}\n"
 #PBS -q hotel
 #PBS -N ${sampleName}
 #PBS -l nodes=1:ppn=8
-#PBS -l walltime=2:00:00
+#PBS -l walltime=5:00:00
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
 #PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
 #PBS -m n 
@@ -658,7 +654,7 @@ $command" > $outputDirectory/qsub_scripts/${sampleName}.torque.sh
 #PBS -q hotel
 #PBS -N ${sampleName}
 #PBS -l nodes=1:ppn=8
-#PBS -l walltime=2:00:00
+#PBS -l walltime=5:00:00
 #PBS -o $outputDirectory/qsub_scripts/${sampleName}_torque_output.txt
 #PBS -e $outputDirectory/qsub_scripts/${sampleName}_torque_error.txt
 #PBS -M $email

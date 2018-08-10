@@ -30,39 +30,39 @@
 map_local_files=false
 testing=false
 map_only=false
-no_emails=false
 paired=false
 copy_sam=false
 glassome_path='/projects/ps-glasslab-data/'
 bowtie_index_path='/gpfs/data01/glasslab/home/jtao/software/bowtie2-2.3.1-legacy/indexes/'
-star_path='/gpfs/data01/glasslab/home/jtao/software/bin/STAR/'
+star_path='/gpfs/data01/glasslab/home/jtao/software/bin/'
 bowtie_path='/gpfs/data01/glasslab/home/jtao/software/bowtie2-2.3.1-legacy/'
 homer_path='/gpfs/data01/glasslab/home/jtao/software/homer/bin/'
 flip=true
+report_unmapped=false
 num_procs=12
 
 # check number of arguments
-if [ $# -lt 4 ] 
+if [ $# -lt 3 ] 
 then
     echo "Usage: "
     echo "map_on_oasis.sh <experiment type (atac|chip|rna)> <genome> \
-<email> <input file directory> [optional arguments]"
+<input file directory> [optional arguments]"
     echo "Options:
 -l    map files already on tscc or are already copied over
 -t    generate qsub scripts but do not execute them
 -m    only map files - do not create tag directories
--e    do not send email notifications
 -s    copy sam files to Glassome
 -p    input data is paired end
 -f    do not use the -flip option when making RNA tag directories
--n    use 24 processors instead of 12"
+-n    use 24 processors instead of 12
+-u    report unmapped reads in Fasta format"
     exit 1
 fi
 
 ### parse the input ###
 
-OPTIND=5
-while getopts "ltmepsfn" option ; do # set $o to the next passed option
+OPTIND=4
+while getopts "ltmepsfnu" option ; do # set $o to the next passed option
     case "$option" in  
     l)  
        map_local_files=true 
@@ -72,9 +72,6 @@ while getopts "ltmepsfn" option ; do # set $o to the next passed option
     ;;  
     m)  
         map_only=true
-    ;;  
-    e)  
-        no_emails=true
     ;;  
     p)  
         paired=true
@@ -88,13 +85,15 @@ while getopts "ltmepsfn" option ; do # set $o to the next passed option
     n)  
         num_procs=24
     ;;  
+    u)  
+        report_unmapped=true
+    ;;  
     esac
 done
 
 experimentType=$1
 genome=$2
-email=$3
-inputDirectory=$4
+inputDirectory=$3
 ###
 
 echo "Beginning processing for $experimentType exeriments."
@@ -103,13 +102,6 @@ if $paired
 then
     echo "Paired end option specified. This script is designed to work with
 Illumina paired end reads only"
-fi
-
-if $no_emails
-then
-    echo "Email notifications have been disabled"
-else
-    echo "Email notifications will be sent to $email"
 fi
 
 if $map_only
@@ -473,11 +465,16 @@ $outputDirectory/tag_directories/$sampleName \
             rm $outputDirectory/log_files/$logName
         fi
         # execute star
-        command="$star_path/STAR \
---genomeDir $star_path/genomes/$genome \
+            command="$star_path/STAR \
+--genomeDir $star_path/STAR_genomes/$genome \
 --readFilesIn $fastqFiles \
 --outFileNamePrefix $currentDirectory/ \
---runThreadN $num_procs \n"
+--runThreadN $num_procs"
+        if $report_unmapped
+        then
+            command+=" --outReadsUnmapped Fastx"
+        fi
+        command+="\n"
         # rename aligned file
         command+="mv $currentDirectory/Aligned.out.sam \
 $outputDirectory/sam_files/$samName\n"
