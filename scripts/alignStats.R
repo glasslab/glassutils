@@ -11,9 +11,9 @@ if(length(args)<1){
   cat("\tpath/to/the/tagDir: A path of folder which contains the tag directories\n")
   cat("\tpath/to/the/tagDir/list/file: A path of a flie listed path to tag directories, one tag directory in one line.\n")
   cat("\t\tCan be usefull when tag directories are not located in the same folder, such as different runs.\n")
+  cat("\teg: alignStats.R /data/mm10/BMDM/ATAC > /home/z5ouyang/alignResults.txt\n")
+  cat("\teg: alignStats.R /home/z5ouyang/tagList > /home/z5ouyang/alignResults.txt\n")
   cat("\tResults: will be send to the standard out, use '>' to capture the results in file\n")
-  cat("\tUsage: alignStats.R /data/mm10/BMDM/ATAC > /home/z5ouyang/alignResults.txt\n")
-  cat("\tUsage: alignStats.R /home/z5ouyang/tagList > /home/z5ouyang/alignResults.txt\n")
   cat("\n\n")
   q()
 }
