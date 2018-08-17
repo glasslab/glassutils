@@ -28,7 +28,7 @@ if(length(args)<2){
   cat("IMo_LPS06h\t/data/scratch/ouyang/Lung/LPS_IP_ATAC_adpTrim/tag_directories/C57BL6_IMo_ATAC_lysisTn5_LPS_6h_B_ES_17_03_13_trimmed;/data/scratch/ouyang/Lung/LPS_IP_ATAC_adpTrim/tag_directories/C57BL6_IMo_ATAC_lysisTn5_LPS_6h_A_ES_17_03_13_trimmed\tB;A\n")
   cat("IMo_LPS20h\t/data/scratch/ouyang/Lung/LPS_IP_ATAC_adpTrim/tag_directories/C57BL6_IMo_ATAC_lysisTn5_LPS_20h_A_ES_17_03_13_trimmed;/data/scratch/ouyang/Lung/LPS_IP_ATAC_adpTrim/tag_directories/C57BL6_IMo_ATAC_lysisTn5_LPS_20h_B_ES_17_03_13_trimmed\tA;B\n")
 
-  cat("\n\teg: ATACpeakCor.R quanTags.txt /home/z5ouyang/quan/\n")
+  cat("\n\teg: ATACpeakCor.R quanTags.txt mm10 -o /home/z5ouyang/quan/\n")
   cat("\n\n")
   q()
 }
