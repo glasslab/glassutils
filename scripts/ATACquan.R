@@ -24,7 +24,7 @@ if(length(args)<2){
   cat("\t\tand located in the same folder as tag directory list file.\n")
   cat("\t/path/to/the/result/folder/: (optional use -o) A path to a folder where the out put files will be saved.\n\t\tDefault: the folder where the tag directory list file is.\n")
   cat("\tdistal: (optional use -d) A number indicate the distance in bp from TSS to be considering distal region. defaul 1000")
-  cat("\n\tAn example of the file (e.g. allTags.txt) contains tag directories:\n")
+  cat("\n\tAn example of the file (e.g. quanTags.txt) contains tag directories:\n")
   cat("IMo_LPS06h\t/data/scratch/ouyang/Lung/LPS_IP_ATAC_adpTrim/tag_directories/C57BL6_IMo_ATAC_lysisTn5_LPS_6h_B_ES_17_03_13_trimmed;/data/scratch/ouyang/Lung/LPS_IP_ATAC_adpTrim/tag_directories/C57BL6_IMo_ATAC_lysisTn5_LPS_6h_A_ES_17_03_13_trimmed\tB;A\n")
   cat("IMo_LPS20h\t/data/scratch/ouyang/Lung/LPS_IP_ATAC_adpTrim/tag_directories/C57BL6_IMo_ATAC_lysisTn5_LPS_20h_A_ES_17_03_13_trimmed;/data/scratch/ouyang/Lung/LPS_IP_ATAC_adpTrim/tag_directories/C57BL6_IMo_ATAC_lysisTn5_LPS_20h_B_ES_17_03_13_trimmed\tA;B\n")
 
