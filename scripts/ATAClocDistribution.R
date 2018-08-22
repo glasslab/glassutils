@@ -16,26 +16,27 @@ if(length(args)<2){
 }
 strAnno <- args[1]
 distal <- as.numeric(args[2])
-strOutput <- paste(dirname(strAnno),"/ATAClocDist.pdf",sep="")
+strPDF <- paste(dirname(strAnno),"/ATAClocDist.pdf",sep="")
 ## processing ----
-normTags <- read.table(strAnno,as.is=T,sep="\t",header=T,row.names=1,quote="",comment.char="")
+normTags <- read.table(strAnno,as.is=T,sep="\t",header=T,row.names=1,quote="",comment.char="",check.names=F)
 normCounts <- normTags[,-(1:18)]
 sID <- basename(sapply(strsplit(colnames(normCounts)," "),head,1))
 names(sID) <- LETTERS[1:length(sID)]
 
 STATs <- matrix(0,nrow=3,ncol=length(sID),dimnames=list(c("Promoter",paste("Distal ",distal/1000,"k",sep=""),"Not in Peaks"),names(sID)))
 STATs[3,] <- 1-apply(normCounts,2,sum)/10000000
-STATs[1,] <- apply(normCounts[!is.na(normTags$Distance.to.TSS)&normTags$Distance.to.TSS<=distal,],2,sum)/10000000
-STATs[2,] <- apply(normCounts[is.na(normTags$Distance.to.TSS)|normTags$Distance.to.TSS>distal,],2,sum)/10000000
+STATs[1,] <- apply(normCounts[!is.na(normTags$'Distance to TSS')&normTags$'Distance to TSS'<=distal,],2,sum)/10000000
+STATs[2,] <- apply(normCounts[is.na(normTags$'Distance to TSS')|normTags$'Distance to TSS'>distal,],2,sum)/10000000
 COL <- c("#ef8a62","#2166ac","#4d4d4d")
-pdf(paste(strOutput,"ATACquan_dist.pdf"),width=9)
+pdf(strPDF,width=9)
 par(mar=c(12,2,0,0)+0.2,mgp=c(0.5,0,0),tcl=-0.03)
 plot(c(),c(),xlim=c(0,1),ylim=c(0,1),axes=F,xlab="",ylab="")
 legend("top",rownames(STATs),fill=COL,horiz=T)
 legend("bottom",paste(names(sID),sID,sep=":"))
 barplot(STATs,las=2,col=COL)
 dev.off()
-write.csv(STATs,file=paste(strOutput,"ATACquan_dist.csv"))
+colnames(STATs) <- sID
+write.csv(t(STATs),file=gsub("pdf$","csv",strPDF))
 cat("Successfully plot the distribution.\n")
 
 
