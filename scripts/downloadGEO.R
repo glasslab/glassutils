@@ -12,7 +12,8 @@ if(length(args)<2){
   cat("\t/GEO/accession/number: The accession number of GEO, such as GSE57872;\n")
   cat("\t/path/to/output/folder/: The out put folder where the fastq files will be saved\n")
   cat("\tSE/PE: (Optional) SE: single-end; PE: paired-end, default is 'SE'\n")
-  cat("\teg:download.R GSE57872 /home/z5ouyang/GSE/")
+  cat("\teg:download.R GSE57872 /home/z5ouyang/GSE/\n")
+  cat("\n\n")
   q()
 }
 strGSE <- args[1]
