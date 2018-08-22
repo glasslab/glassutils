@@ -11,6 +11,7 @@ if(length(args)<2){
   cat("\tdistal: A number indicate the distance in bp from TSS to be considering distal region.\n")
   cat("\t/full/path/to/the/result/pdf/file: (optional) the file name where the results will be plot in. Defaul: 'ATAClocDist.pdf' in the same folder of annotated file\n")
   cat("eg: ATAClocDistribution.R ATAC_LPS00h_annotatePeaks.txt 1000\n")
+  cat("\n\n")
   q()
 }
 strAnno <- args[1]
@@ -34,6 +35,7 @@ legend("top",rownames(STATs),fill=COL,horiz=T)
 legend("bottom",paste(names(sID),sID,sep=":"))
 barplot(STATs,las=2,col=COL)
 dev.off()
+write.csv(STATs,file=paste(strOutput,"ATACquan_dist.csv"))
 cat("Successfully plot the distribution.\n")
 
 
