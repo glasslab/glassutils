@@ -33,33 +33,57 @@ if(sum(names(options)=="deNovo")==1) deNovo <- as.numeric(unlist(strsplit(option
 
 pdf(strPDF,width=9)
 ## known motif -------
-motif <- c()
+motifP <- motifR <- c()
+totalSeq <- c(target=0,bg=0)
 for(i in list.dirs(strInput,recursive = F)){
   strMotif <- paste(i,"/knownResults.txt",sep="")
   if(file.exists(strMotif)){
     one <- read.table(strMotif,sep="\t",header=T,as.is=T,check.names=F,comment.char="")
-    one <- one[1:min(topN,sum(one[,3]<0.01)),c(1,4),drop=F]
-    dimnames(one) <- list(one[,1],c("motif",basename(i)))
-    motif <- merge(motif,-one[,2,drop=F],by="row.names",all=T)
-    rownames(motif) <- motif[,1]
-    motif <- motif[,-1,drop=F]
+    one <- one[1:min(topN,sum(one[,3]<0.01)),c(1,4,7,9),drop=F]
+    dimnames(one) <- list(one[,1],c("motif",paste(basename(i),c("logP","target","bg"),sep="_")))
+    # logP
+    motifP <- merge(motifP,-one[,2,drop=F],by="row.names",all=T)
+    rownames(motifP) <- motifP[,1]
+    motifP <- motifP[,-1,drop=F]
+    # enrichment
+    one <- one[,3:4]
+    motifR <- merge(motifR,matrix(as.numeric(gsub("%","",as.matrix(one))),ncol=ncol(one),dimnames=dimnames(one)),
+                    by="row.names",all=T,sort=F)
+    rownames(motifR) <- motifR[,1]
+    motifR <- motifR[,-1,drop=F]
   }
 }
-if(length(motif)==0) stop("Cannot locat any motif analyses result")
-motif[is.na(motif)] <- 0
+# plot logP heatmap
+if(length(motifP)==0) stop("Cannot locate any motif analyses result")
+motifP[is.na(motifP)] <- 0
 require(pheatmap)
 require(RColorBrewer)
-COL <- brewer.pal(n = 8, name ="Dark2")[1:ncol(motif)]
-names(COL) <- colnames(motif)
+COL <- brewer.pal(n = 8, name ="Dark2")[1:ncol(motifP)]
+names(COL) <- colnames(motifP)
 
-sMotif <- sort(motif[motif!=0])
+sMotif <- sort(motifP[motifP!=0])
 heatCOL <- colorRampPalette(rev(brewer.pal(n = 7, name ="RdYlBu")))(min(length(sMotif)-2,10))
 br <- c(0,sMotif[floor(seq(1,length(sMotif)-1,length.out=length(heatCOL)-1))]-min(diff(sMotif))/10,max(sMotif)+min(diff(sMotif))/10)
-pheatmap(motif,cluster_cols=F,annotation_colors=list(grp=COL),
+pheatmap(motifP,cluster_cols=F,annotation_colors=list(grp=COL),
          color = heatCOL,
          breaks=br,
-         annotation_col=data.frame(row.names=colnames(motif),
-                                   grp=colnames(motif)))
+         annotation_col=data.frame(row.names=colnames(motifP),
+                                   grp=colnames(motifP)))
+# plot bulble plot for enrichment
+#print(motifR)
+require(ggplot2)
+X <- data.frame()
+for(i in gsub("_bg","",grep("_bg$",colnames(motifR),value=T))){
+  X <- rbind(X,data.frame(grp=i,motif=rownames(motifR),
+                          enrichment=motifR[,paste(i,"target",sep="_")]/motifR[,paste(i,"bg",sep="_")],
+                          bg=motifR[,paste(i,"bg",sep="_")]))
+}
+print(ggplot(X,aes(x=grp,y=motif))+geom_point(aes(size=enrichment,colour=bg))+scale_size_continuous(range = c(1,10))+
+        scale_color_gradient(low="#fee5d9", high="#a50f15")+
+        theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(), axis.line =element_blank(),
+              panel.background = element_blank()))
+
 ## homer motif -------
 require(htmltab)
 ori <- par(mar=c(2,7,max(c(0,(30-length(deNovo)*2))),1)+0.1,mgp=c(0.5,0,0),tcl=-0.1)

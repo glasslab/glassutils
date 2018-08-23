@@ -72,7 +72,7 @@ D <- DESeqDataSetFromMatrix(countData=matrix(as.integer(distalC),nrow=nrow(dista
                             colData=pheno,
                             design=as.formula(paste("~",paste(colnames(pheno),collapse="+"))))
 dds <- DESeq(D,betaPrior=TRUE)
-## extract induced peaks ------
+## extract target peaks ------
 peakDef <- rawTags[rownames(distalC),1:4]
 normP <- log2(counts(dds,normalized=T)+1)
 allDBP <- c()
@@ -86,7 +86,7 @@ for(i in unique(pClass)){
   peakID <- unique(peakID)
   allDBP <- c(allDBP,peakID)
   if(length(peakID)>50){
-    write.table(peakDef[peakID,],file=paste(strOutput,i,"_induced.txt",sep=""),
+    write.table(peakDef[peakID,],file=paste(strOutput,i,"_target.txt",sep=""),
                 sep="\t",quote=F,col.names=F)
   }
   write.table(peakDef[!rownames(peakDef)%in%peakID,],
