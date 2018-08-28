@@ -17,7 +17,7 @@ if(length(args)<1){
 strPath <- args[1]
 strLength <- args[2]
 
-strOut <- paste(strPath,"/trim/",sep="")
+strOut <- paste(dirname(strPath),"/",basename(strPath),"_trim",strLength,"/",sep="")
 if(!dir.exists(strOut)) dir.create(strOut)
 for(i in list.files(strPath,"fastq.gz$",full.names=T)){
   strF <- paste(strOut,gsub("fastq\\.gz","trim.fastq",basename(i)),sep="")

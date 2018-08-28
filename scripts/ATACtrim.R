@@ -22,7 +22,7 @@ strPath <- args[1]
 if(length(args)>1){
   strRes <- args[2]
 }else{
-  strRes <- paste(strPath,"/trimmed/",sep="")
+  strRes <- paste(dirname(strPath),"/",basename(strPath),"_ATACtrim","/",sep="")
 }
 if(!dir.exists(strRes)) {dir.create(strRes)}
 
