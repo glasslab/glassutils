@@ -10,7 +10,7 @@ if(length(args)<1){
   cat("\tusage: trimLen.R /full/path/to/the/fastq/folder/ <length>\n")
   cat("\tlength: the number of leading bp to be kept\n")
   cat("\teg: trimLen.R /data/archive/18-07-09-glass/AN/18-07-09-glass_cleveland_atac/ 50")
-  cat("\n\tResult: A folder named trim will be created in the folder and where all the trimed fastqs will be located\n")
+  cat("\n\tResult: located in a new folder with the name appended with '_trim' plus the length after input folder name.\n")
   cat("\n\n")
   q()
 }
