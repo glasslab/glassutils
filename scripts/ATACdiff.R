@@ -97,14 +97,21 @@ allDBP <- unique(allDBP)
 write.table(peakDef[allDBP,],file=paste(strOutput,"/allDCA.txt",sep=""),sep="\t",quote=F,col.names=F)
 require(pheatmap)
 require(RColorBrewer)
-COL <- brewer.pal(n = 8, name ="Dark2")[1:length(unique(pClass))]
+require(colorspace)
+if(length(unique(pClass))<=8){
+  COL <- brewer.pal(n = 8, name ="Dark2")[1:length(unique(pClass))]
+}else{
+  COL <-rainbow_hcl(length(unique(pClass)))
+}
 names(COL) <- unique(pClass)
+subDBP <- allDBP[sample(length(allDBP),min(10000,length(allDBP)))]
+save(normP,allDBP,subDBP,COL,pClass,file="test.RData")
 pdf(paste(strOutput,"/allDCA.pdf",sep=""),height = 9)#,onefile=FALSE
-pheatmap(normP[allDBP,],annotation_colors=list(grp=COL),labels_row=rep("",length(allDBP)),
+pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),labels_row=rep("",length(subDBP)),
          color = colorRampPalette(c("navy", "gray90", "firebrick4"))(50),
          annotation_col = data.frame(row.names=colnames(normP),
                                      grp=pClass))
-pheatmap(normP[allDBP,],annotation_colors=list(grp=COL),scale="row",labels_row=rep("",length(allDBP)),
+pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),scale="row",labels_row=rep("",length(subDBP)),
          color = colorRampPalette(c("navy", "gray90", "firebrick4"))(50),
          annotation_col = data.frame(row.names=colnames(normP),
                                      grp=pClass))

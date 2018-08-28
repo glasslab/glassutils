@@ -56,9 +56,16 @@ for(i in list.dirs(strInput,recursive = F)){
 # plot logP heatmap
 if(length(motifP)==0) stop("Cannot locate any motif analyses result")
 motifP[is.na(motifP)] <- 0
+rownames(motifP) <- substr(rownames(motifP),1,apply(cbind(nchar(rownames(motifP)),15),1,min))
 require(pheatmap)
 require(RColorBrewer)
-COL <- brewer.pal(n = 8, name ="Dark2")[1:ncol(motifP)]
+require(colorspace)
+if(ncol(motifP)<=8){
+  COL <- brewer.pal(n = 8, name ="Dark2")[1:ncol(motifP)]
+}else{
+  COL <-rainbow_hcl(ncol(motifP))
+}
+#COL <- brewer.pal(n = 8, name ="Dark2")[1:ncol(motifP)]
 names(COL) <- colnames(motifP)
 
 sMotif <- sort(motifP[motifP!=0])
@@ -74,14 +81,17 @@ pheatmap(motifP,cluster_cols=F,annotation_colors=list(grp=COL),
 require(ggplot2)
 X <- data.frame()
 for(i in gsub("_bg","",grep("_bg$",colnames(motifR),value=T))){
-  X <- rbind(X,data.frame(grp=i,motif=rownames(motifR),
+  X <- rbind(X,data.frame(grp=i,motif=substr(rownames(motifR),1,apply(cbind(nchar(rownames(motifR)),15),1,min)),
                           enrichment=motifR[,paste(i,"target",sep="_")]/motifR[,paste(i,"bg",sep="_")],
                           bg=motifR[,paste(i,"bg",sep="_")]))
 }
+
+rownames(motifP) <- substr(rownames(motifP),1,apply(cbind(nchar(rownames(motifP)),15),1,min))
 print(ggplot(X,aes(x=grp,y=motif))+geom_point(aes(size=enrichment,colour=bg))+scale_size_continuous(range = c(1,10))+
         scale_color_gradient(low="#fee5d9", high="#a50f15")+
         theme(panel.border = element_blank(), panel.grid.major = element_blank(),
               panel.grid.minor = element_blank(), axis.line =element_blank(),
+              axis.text.x = element_text(angle = 45, hjust = 1),
               panel.background = element_blank()))
 
 ## homer motif -------
