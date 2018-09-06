@@ -44,7 +44,7 @@ spec <- matrix(c("peaks","f",2,"character",
                  "output","o",2,"character",
                  "distal","d",2,"double"),byrow=TRUE, ncol=4)
 options = getopt(spec,opt=commandArgs(trailingOnly=TRUE)[-c(1:2)])
-if(sum(names(options)=="peaks")==1) strPeaks <- unlist(strsplit(options$peaks,";"))
+if(sum(names(options)=="peaks")==1) strPeaks <- unlist(strsplit(options$peaks,","))
 if(sum(names(options)=="output")==1) strOutput <- options$output
 if(sum(names(options)=="distal")==1) distal <- options$distal
 
