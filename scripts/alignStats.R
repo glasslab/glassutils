@@ -19,14 +19,15 @@ if(length(args)<1){
 }
 strInput <- args[1]
 
-if(sum(dir(dirname(strInput))==basename(strInput))==0){
+if(file.exists(strInput) && !dir.exists(strInput)){
   strDir <- unlist(read.table(strInput,as.is=T))
-}else if(sum(dir(dirname(strInput))==basename(strInput))==1){
+}else if(!file.exists(strInput) && dir.exists(strInput)){
   strDir <- list.dirs(strInput,recursive=F)[-1]
   #strDir <- strDir[strDir!=strInput]
 }else{
   stop("unknown input!")
 }
+#cat("Extract alignment stats from:\n",paste(strDir,collapse="\n"),"\n",sep="\t")
 ######################################################
 ## stats
 stat.names <- c("alignerTotal","alignerUnique","alignerUniqueRate","alignerMulti","homerUniPos","homerTotal","tagPosition","homerAvgLength","mitoNum","mitoRate")
