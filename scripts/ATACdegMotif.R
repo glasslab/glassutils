@@ -57,11 +57,11 @@ if(nPeaks<30){
   stop(paste("Only",nPeaks,"peaks overlap. At least 30 is required for the motif calling."))
 }
 if(is.null(strBG)){
-  system(paste("findMotifsGenome.pl",strGenePeak,strGenome,strOut,"-size 200 -mknown /home/z5ouyang/src/data/all_threshold_0.5.motif"))
+  system(paste("findMotifsGenome.pl",strGenePeak,strGenome,strOut,"-size given "))
 }else{
-  system(paste("findMotifsGenome.pl",strGenePeak,strGenome,strOut,"-size 200 -mknown /home/z5ouyang/src/data/all_threshold_0.5.motif -bg",strBG))
+  system(paste("findMotifsGenome.pl",strGenePeak,strGenome,strOut,"-size given -bg",strBG))
 }
-
+#-mknown /home/z5ouyang/src/data/all_threshold_0.5.motif
 
 
 

@@ -41,12 +41,18 @@ if(is.null(strInfo)&&is.null(pClass)){
   stop("ERROR: one of -f/-s has to be provided for DCA analysis\n")
 }
 ## get the sample information ----
+COL <- NULL
 if(!is.null(strInfo)){
-  tagInfo <- read.table(strInfo,sep="\t",row.names=1,as.is = T)
+  tagInfo <- read.table(strInfo,sep="\t",row.names=1,as.is = T,comment.char = "")
   pClass <- c()
   for(i in rownames(tagInfo)){
     sID <- c(sID,paste(i,unlist(strsplit(tagInfo[i,2],";")),sep="_"))
     pClass <- c(pClass,rep(i,length(sID)-length(pClass)))
+    if(ncol(tagInfo)>2) COL <- c(COL,tagInfo[i,3])
+  }
+  if(ncol(tagInfo)>2){
+    names(COL) <- unique(pClass)
+    print(COL)
   }
 }
 if(is.null(sID)){
@@ -61,9 +67,11 @@ if(is.null(sID)){
 rawTags <- read.table(strTags,as.is=T,sep="\t",header=T,row.names=1,quote="",comment.char="",check.names=F)
 rawC <- as.matrix(rawTags[,-(1:18)])
 if(ncol(rawC)!=length(pClass)) stop(paste("ERROR:",strTags,"(",ncol(rawC),") contains different sample number from the group codes(",length(pClass),") (eigher -f or -s)."))
-write.table(cbind(idInUse=sID,tagName=basename(sapply(strsplit(colnames(rawC)," "),head,1)),group=pClass),file=paste(strOutput,"sID.txt"),sep="\t",row.names=F)
+write.table(cbind(idInUse=sID,tagName=basename(sapply(strsplit(colnames(rawC)," "),head,1)),group=pClass),file=paste(strOutput,"sID.txt",sep=""),sep="\t",row.names=F)
 colnames(rawC) <- sID
-distalC <- rawC[is.na(rawTags$'Distance to TSS')|rawTags$'Distance to TSS'>distal,]
+
+distalC <- rawC[(is.na(rawTags$'Distance to TSS')|rawTags$'Distance to TSS'>distal)&grepl("Intergenic",rawTags$Annotation,ignore.case=T),]
+if(distal<1000) distalC <- rawC[is.na(rawTags$'Distance to TSS')|rawTags$'Distance to TSS'>distal,]
 distalC <- distalC[apply(distalC,1,function(x){return(sum(x>8))})>1,]
 ## DESeq2 -----
 require(DESeq2)
@@ -76,12 +84,51 @@ dds <- DESeq(D,betaPrior=TRUE)
 peakDef <- rawTags[rownames(distalC),1:4]
 normP <- log2(counts(dds,normalized=T)+1)
 allDBP <- c()
+require(gplots)
+require(MASS)
+require(RColorBrewer)
+require(colorspace)
+if(is.null(COL)){
+  if(length(unique(pClass))<=8){
+    COL <- brewer.pal(n = 8, name ="Dark2")[1:length(unique(pClass))]
+  }else{
+    COL <-rainbow_hcl(length(unique(pClass)))
+  }
+  names(COL) <- unique(pClass)
+}
+pdf(paste(strOutput,"/pairwised_DCA.pdf",sep=""),width=4,height=4)
+par(mar=c(2,2,0,0)+0.2,mgp=c(1,0.1,0),tcl=-0.05)
+imageCOL <- c("#FFFFFFFF",colorpanel(20,"#3300FFFF","#00FFFFFF","#CCFF00FF"),colorpanel(20,"#CCFF00FF","#FF9900FF","#AA0000FF"))
 for(i in unique(pClass)){
   peakID <- c()
   for(j in unique(pClass)){
     if(i==j) next
     res <- results(dds,contrast = c("grp",i,j))
     peakID <- c(peakID,rownames(res)[!is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]>logFC])
+    ## pairwised ploting
+    x <- apply(normP[,pClass==i,drop=F],1,mean)
+    y <- apply(normP[,pClass==j,drop=F],1,mean)
+    xlim <- range(x)
+    ylim <- range(y)
+    xlab <- paste(i,": log2 Mean normalized tag",sep="")
+    ylab <- paste(j,": log2 Mean normalized tag",sep="")
+    tryM <- try(f1 <- kde2d(x,y,n=200),silent=T)
+    if(is.null(names(tryM))){
+      plot(c(),c(),xlab=xlab,ylab=ylab)
+      index <- rep(T,nrow(normP))
+    }else{
+      image(f1,col=imageCOL,xlab=xlab,ylab=ylab,xlim=xlim,ylim=ylim)
+      imageZero <- diff(range(f1$z))/length(imageCOL)
+      index <- apply(cbind(x,y),1,function(x,fit,cutZero){return(fit$z[sum((x[1]-fit$x)>=0),sum((x[2]-fit$y)>=0)]<cutZero)},f1,imageZero)
+    }
+    points(x[index],y[index],col=imageCOL[2],pch=20)
+    lines(range(c(xlim,ylim)),range(c(xlim,ylim)),col="gray")
+    lines(range(c(xlim,ylim)),range(c(xlim,ylim))+logFC,col="gray",lty=2)
+    lines(range(c(xlim,ylim)),range(c(xlim,ylim))-logFC,col="gray",lty=2)
+    legend("topleft",paste(j,": ",sum(!is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]< -logFC)," peaks",sep=""),
+           box.lty=0,text.col=COL[j])
+    legend("bottomright",paste(i,": ",sum(!is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]>logFC)," peaks",sep=""),
+           box.lty=0,text.col=COL[i])
   }
   peakID <- unique(peakID)
   allDBP <- c(allDBP,peakID)
@@ -93,19 +140,12 @@ for(i in unique(pClass)){
               file=paste(strOutput,i,"_bg.txt",sep=""),
               sep="\t",quote=F,col.names=F)
 }
+dev.off()
 allDBP <- unique(allDBP)
 write.table(peakDef[allDBP,],file=paste(strOutput,"/allDCA.txt",sep=""),sep="\t",quote=F,col.names=F)
 require(pheatmap)
-require(RColorBrewer)
-require(colorspace)
-if(length(unique(pClass))<=8){
-  COL <- brewer.pal(n = 8, name ="Dark2")[1:length(unique(pClass))]
-}else{
-  COL <-rainbow_hcl(length(unique(pClass)))
-}
-names(COL) <- unique(pClass)
 subDBP <- allDBP[sample(length(allDBP),min(10000,length(allDBP)))]
-save(normP,allDBP,subDBP,COL,pClass,file="test.RData")
+#save(normP,allDBP,subDBP,COL,pClass,file="test.RData")
 pdf(paste(strOutput,"/allDCA.pdf",sep=""),height = 9)#,onefile=FALSE
 pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),labels_row=rep("",length(subDBP)),
          color = colorRampPalette(c("navy", "gray90", "firebrick4"))(50),
@@ -113,6 +153,10 @@ pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),labels_row=rep("",length
                                      grp=pClass))
 pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),scale="row",labels_row=rep("",length(subDBP)),
          color = colorRampPalette(c("navy", "gray90", "firebrick4"))(50),
+         annotation_col = data.frame(row.names=colnames(normP),
+                                     grp=pClass))
+pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),scale="row",labels_row=rep("",length(subDBP)),
+         color = colorRampPalette(c("navy", "gray90", "firebrick4"))(50),cluster_cols=F,
          annotation_col = data.frame(row.names=colnames(normP),
                                      grp=pClass))
 dev.off()
