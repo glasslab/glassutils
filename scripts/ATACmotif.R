@@ -20,6 +20,7 @@ if(length(args)<2){
   q()
 }
 ## input ----
+motifchar <- 50
 strInput <- args[1]
 topN <- as.numeric(args[2])
 strPDF <- NULL
@@ -70,7 +71,8 @@ for(i in strDir){
 # plot logP heatmap
 if(length(motifP)==0) stop("Cannot locate any motif analyses result")
 motifP[is.na(motifP)] <- 0
-rownames(motifP) <- substr(rownames(motifP),1,apply(cbind(nchar(rownames(motifP)),15),1,min))
+#print(motifP)
+rownames(motifP) <- substr(rownames(motifP),1,apply(cbind(nchar(rownames(motifP)),motifchar),1,min))
 require(pheatmap)
 require(RColorBrewer)
 require(colorspace)
@@ -99,12 +101,12 @@ require(ggplot2)
 X <- data.frame()
 for(i in gsub("_bg$","",grep("_bg$",colnames(motifR),value=T))){
   #print(paste(i,"bg",sep="_"))
-  X <- rbind(X,data.frame(grp=i,motif=substr(rownames(motifR),1,apply(cbind(nchar(rownames(motifR)),15),1,min)),
+  X <- rbind(X,data.frame(grp=i,motif=substr(rownames(motifR),1,apply(cbind(nchar(rownames(motifR)),motifchar),1,min)),
                           enrichment=motifR[,paste(i,"target",sep="_")]/motifR[,paste(i,"bg",sep="_")],
                           target=motifR[,paste(i,"target",sep="_")]))
 }
 
-rownames(motifP) <- substr(rownames(motifP),1,apply(cbind(nchar(rownames(motifP)),15),1,min))
+rownames(motifP) <- substr(rownames(motifP),1,apply(cbind(nchar(rownames(motifP)),motifchar),1,min))
 print(ggplot(X,aes(x=grp,y=motif))+geom_point(aes(size=enrichment,colour=target))+scale_size_continuous(range = c(1,10))+
         scale_color_gradient(low="#fee5d9", high="#a50f15")+
         theme(panel.border = element_blank(), panel.grid.major = element_blank(),
