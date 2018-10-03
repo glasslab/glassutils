@@ -21,7 +21,7 @@ strInput <- args[1]
 
 if(file.exists(strInput) && !dir.exists(strInput)){
   strDir <- unlist(read.table(strInput,as.is=T))
-}else if(!file.exists(strInput) && dir.exists(strInput)){
+}else if(dir.exists(strInput)){
   strDir <- list.dirs(strInput,recursive=F)[-1]
   #strDir <- strDir[strDir!=strInput]
 }else{
