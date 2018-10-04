@@ -88,7 +88,7 @@ names(COL) <- colnames(motifP)
 print(COL)
 
 sMotif <- sort(motifP[motifP!=0])
-heatCOL <- colorRampPalette(rev(brewer.pal(n = 7, name ="RdYlBu")))(min(length(sMotif)-2,10))
+heatCOL <- colorRampPalette(brewer.pal(n = 7, name ="Oranges"))(min(length(sMotif)-2,10))#RdYlBu
 br <- c(0,sMotif[floor(seq(1,length(sMotif)-1,length.out=length(heatCOL)-1))]-min(diff(sMotif))/10,max(sMotif)+min(diff(sMotif))/10)
 pheatmap(motifP,cluster_cols=F,annotation_colors=list(grp=COL),
          color = heatCOL,
@@ -137,7 +137,7 @@ for(i in strDir){
   maxP <- ceiling(max(logP)/10)*10
   maxR <- maxP/3
   # significance p-value bar plot
-  y <- barplot(logP,horiz=T,xlab="-log(p-value)",las=1,main=basename(i),xlim=c(0,maxP+maxR),col=COL[i])
+  y <- barplot(logP,horiz=T,xlab="-log(p-value)",las=1,main=basename(i),xlim=c(0,maxP+maxR),col=COL[basename(i)])
   text(rep(maxP/2,length(y)),y,rev(motifID))
   # target/bg ratio line plot
   Col <- c(frame="black",tg="#006d2c",bg="#74c476")
