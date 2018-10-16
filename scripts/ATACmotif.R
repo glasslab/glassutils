@@ -13,7 +13,7 @@ if(length(args)<2){
   cat("\t\twhich all different conditions would be plotted in a heatmap.\n")
   cat("\ttopN: A number indicate the top motifs to be selected.\n")
   cat("\t/path/to/the/result/pdf: (optional use -f) The pdf file where the result should be plotted, default, 'allMotif.pdf' in the folder as first specified parameter\n")
-  cat("\t/deNovo/motif/index: (optional use -i) indicate the index of de novo motif to be plotted, seperated by ';', default: 1;2;3;...;topN\n")
+  cat("\t/deNovo/motif/index: (optional use -i) indicate the index of de novo motif to be plotted, seperated by ',', default: 1,2,3,...,topN\n")
   
   cat("\n\teg: ATACmotif.R /home/z5ouyang/motifAnalyses/ 5\n")
   cat("\n\n")
@@ -30,12 +30,13 @@ spec <- matrix(c("strPDF","f",2,"character",
                  "deNovo","i",2,"character"),byrow=TRUE, ncol=4)
 options = getopt(spec,opt=commandArgs(trailingOnly=TRUE)[-c(1:2)])
 if(sum(names(options)=="strPDF")==1) strPDF <- options$strPDF
-if(sum(names(options)=="deNovo")==1) deNovo <- as.numeric(unlist(strsplit(options$deNovo,";")))
+if(sum(names(options)=="deNovo")==1) deNovo <- as.numeric(unlist(strsplit(options$deNovo,",")))
 
 COL <- NULL
-cat(strInput,file.exists(strInput),dir.exists(strInput),"\n")
+#cat(strInput,file.exists(strInput),dir.exists(strInput),"\n")
 if(file.exists(strInput) && !dir.exists(strInput)){
-  res <- read.table(strInput,as.is=T,sep="\t",comment.char = "")
+  res <- read.table(strInput,as.is=T,sep="\t",comment.char = "",quote="")
+  #print(res[,1])
   strDir <- res[,1]
   COL <- res[,2]
   if(is.null(strPDF)) strPDF <- paste(dirname(strInput),"/allMotif.pdf",sep="")
@@ -136,17 +137,22 @@ for(i in strDir){
   logP <- -as.numeric(motifs[,"log P-pvalue"])
   maxP <- ceiling(max(logP)/10)*10
   maxR <- maxP/3
+  stepN <- 4
+  maxTarget <- stepN*ceiling(max(as.numeric(gsub("%","",motifs[,"% of Targets"])))/stepN)
   # significance p-value bar plot
   y <- barplot(logP,horiz=T,xlab="-log(p-value)",las=1,main=basename(i),xlim=c(0,maxP+maxR),col=COL[basename(i)])
-  text(rep(maxP/2,length(y)),y,rev(motifID))
+  #text(rep(maxP/2,length(y)),y,rev(motifID),col="gray50")
+  a <- 255-mean(as.vector(col2rgb(COL[basename(i)])))
+  text(rep(0,length(y)),y,rev(motifID),pos=4,col=rgb(a,a,a,maxColorValue=255))
   # target/bg ratio line plot
   Col <- c(frame="black",tg="#006d2c",bg="#74c476")
-  axis(3,c(maxP,maxP+maxR/4,maxP+maxR/2,maxP+maxR*3/4,maxP+maxR),c("0%","25%","50%","75%","100%"),col=Col["frame"],col.axis=Col["frame"])
+  axis(3,maxP+maxR*c(0:stepN)/stepN,paste(c(0:stepN)*maxTarget/stepN,"%",sep=""),col=Col["frame"],col.axis=Col["frame"])
+  #axis(3,c(maxP,maxP+maxR/4,maxP+maxR/2,maxP+maxR*3/4,maxP+maxR),c("0%","25%","50%","75%","100%"),col=Col["frame"],col.axis=Col["frame"])
   mtext("Percentage in sequence",3,1,at=maxP+maxR,col=Col["frame"],adj=1)
-  lines(as.numeric(gsub("%","",motifs[,"% of Targets"]))*maxR/100+maxP,y,col=Col["tg"])
-  points(as.numeric(gsub("%","",motifs[,"% of Targets"]))*maxR/100+maxP,y,col=Col["tg"],pch=15)
-  lines(as.numeric(gsub("%","",motifs[,"% of Background"]))*maxR/100+maxP,y,col=Col["bg"],lty=2)
-  points(as.numeric(gsub("%","",motifs[,"% of Background"]))*maxR/100+maxP,y,col=Col["bg"],pch=16)
+  lines(as.numeric(gsub("%","",motifs[,"% of Targets"]))*maxR/maxTarget+maxP,y,col=Col["tg"])
+  points(as.numeric(gsub("%","",motifs[,"% of Targets"]))*maxR/maxTarget+maxP,y,col=Col["tg"],pch=15)
+  lines(as.numeric(gsub("%","",motifs[,"% of Background"]))*maxR/maxTarget+maxP,y,col=Col["bg"],lty=2)
+  points(as.numeric(gsub("%","",motifs[,"% of Background"]))*maxR/maxTarget+maxP,y,col=Col["bg"],pch=16)
   lines(rep(maxP,2),c(0,max(y)*2),col=Col["frame"],lty=2)
   legend("bottomright",names(Col)[-1],col=Col[-1],lty=1:2,pch=15:16,box.lty=0,text.col=Col[-1])
 }

@@ -14,7 +14,7 @@ if(length(args)<2){
   cat("\tusage: ATACquan.R /path/to/the/file/listed/sample/tag/directories genome [-f /path/to/peak/files -o /path/to/the/result/folder/ -d distal -s size]\n")
   cat("\t/path/to/the/file/listed/sample/tag/directories: The file contains path of tag directories.\n")
   cat("\tgenome: mm10 or hg38\n")
-  cat("\t/path/to/peak/files: (optional use -f) path to the peak files (separated by ';', mergePeaks will be used) which will be used to quantify the ATAC tags.\n")
+  cat("\t/path/to/peak/files: (optional use -f) path to the peak files (separated by ',', mergePeaks will be used) which will be used to quantify the ATAC tags.\n")
   cat("\t\tIf not provided, make sure all IDR peak files named as first column of tag directory list file plus '_idr.txt',\n")
   cat("\t\tand located in the same folder as tag directory list file.\n")
   cat("\t/path/to/the/result/folder/: (optional use -o) A path to a folder where the out put files will be saved.\n\t\tDefault: the folder where the tag directory list file is.\n")
@@ -50,7 +50,7 @@ if(!dir.exists(strTmp)) dir.create(strTmp)
 strPeak <- strPeaks
 if(length(strPeaks)>1){
   strPeak <- paste(strTmp,"allPeaks",sep="")
-  system(paste("mergePeaks -d 200",paste(strPeaks,collapse=" "),">",strPeak))
+  system(paste("mergePeaks -d",pSize,paste(strPeaks,collapse=" "),">",strPeak))
 }
 
 ## annotate peaks on tag directories ------
