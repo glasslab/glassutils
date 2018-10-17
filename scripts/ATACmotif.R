@@ -148,8 +148,8 @@ for(i in sapply(strsplit(gT$grobs[[4]]$label,"\\/"),head,1)){
 gT$grobs[[4]] <- arrangeGrob(grobs=tmp,layout_matrix=lay)#,ncol=2
 plot(gT)
 #save(motifR,motifP,file="t.RData")
-# plot bulble plot for enrichment
-cat("Plotting known motif bulble plots\n")
+# plot bubble plot for enrichment
+cat("Plotting known motif bubble plots\n")
 require(ggplot2,quietly=T)
 X <- data.frame()
 rownames(motifP) <- sapply(strsplit(rownames(motifP),"\\/"),head,1)
