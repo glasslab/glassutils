@@ -88,7 +88,7 @@ for(i in strDir){
                     list(textGrob(gsub("%","",paste(one[j,3],one[j,4],sep="/")))))
       lay <- rbind(lay,max(lay)+lay[1,])
     }
-    lay <- rbind(lay,matrix(1+max(lay),nrow=15-nrow(lay),ncol=ncol(lay)))
+    if(nrow(lay)<15) lay <- rbind(lay,matrix(1+max(lay),nrow=15-nrow(lay),ncol=ncol(lay)))
     #save(logos,one,oneTable,kIndex,file="t.RData")
     plot(arrangeGrob(grobs=oneTable,layout_matrix=lay,top=basename(i)))#ncol=4
     #stop()
@@ -213,7 +213,7 @@ for(i in strDir){
                   list(textGrob(tail(motifID,1),x=unit(0, "npc"),just="left")))
     lay <- rbind(lay,max(lay)+lay[1,])
   }
-  lay <- rbind(lay,matrix(1+max(lay),nrow=15-nrow(lay),ncol=ncol(lay)))
+  if(nrow(lay)<15) lay <- rbind(lay,matrix(1+max(lay),nrow=15-nrow(lay),ncol=ncol(lay)))
   plot(arrangeGrob(grobs=oneTable,layout_matrix=lay,top=basename(i)))#ncol=4
 
   # obtain the motif info
