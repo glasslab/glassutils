@@ -185,6 +185,7 @@ names(COL) <- gsub("_logP","",names(COL))
 #print(strDir)
 for(i in strDir){
   deNovo <- as.numeric(hIndex[[basename(i)]])
+  if(length(deNovo)<=0) next
   ori <- par(mar=c(2,7,max(c(0,(30-length(deNovo)*2))),1)+0.1,mgp=c(0.5,0,0),tcl=-0.1)
   strMotif <- paste(i,"/homerResults.html",sep="")
   if(!file.exists(strMotif)) next
