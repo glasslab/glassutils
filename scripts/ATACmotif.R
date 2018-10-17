@@ -30,7 +30,7 @@ strInput <- args[1]
 topN <- as.numeric(args[2])
 strPDF <- NULL
 deNovo <- 1:topN
-require(getopt)
+require(getopt,quietly=T)
 spec <- matrix(c("strPDF","f",2,"character",
                  "deNovo","i",2,"character"),byrow=TRUE, ncol=4)
 options = getopt(spec,opt=commandArgs(trailingOnly=TRUE)[-c(1:2)])
@@ -41,7 +41,7 @@ hIndex <- kIndex <- COL <- NULL
 #cat(strInput,file.exists(strInput),dir.exists(strInput),"\n")
 # file needs a header 
 if(file.exists(strInput) && !dir.exists(strInput)){
-  res <- read.table(strInput,as.is=T,sep="\t",comment.char = "",quote="",header=T)
+  res <- read.table(strInput,as.is=T,sep="\t",comment.char = "",header=T)
   #print(res[,1])
   strDir <- res[,1]
   COL <- res[,2]
@@ -61,13 +61,14 @@ if(is.null(hIndex)) for(i in basename(strDir)) hIndex[[i]] <- deNovo
 #print(strDir)
 pdf(strPDF,width=9)
 ## known motif -------
-require(grImport)
-require(gridExtra)
+require(grImport,quietly=T)
+require(gridExtra,quietly=T)
 selMotif <- motifP <- motifR <- c()
 logos <- list()
 for(i in strDir){
   strMotif <- paste(i,"/knownResults.txt",sep="")
   if(file.exists(strMotif)){
+    cat("Plotting known motif table for",basename(i),"\n")
     one <- read.table(strMotif,sep="\t",header=T,as.is=T,check.names=F,comment.char="")
     one <- one[!duplicated(one[,1]),c(1,4,7,9),drop=F]
     dimnames(one) <- list(one[,1],c("motif",paste(basename(i),c("logP","target","bg"),sep="_")))
@@ -107,12 +108,13 @@ motifP <- motifP[unique(selMotif),,drop=F]
 motifR <- motifR[unique(selMotif),,drop=F]
 
 # plot logP heatmap
+cat("Plotting known motif heatmap\n")
 if(length(motifP)==0) stop("Cannot locate any motif analyses result")
 motifP[is.na(motifP)] <- 0
 rownames(motifP) <- substr(rownames(motifP),1,apply(cbind(nchar(rownames(motifP)),motifchar),1,min))
-require(pheatmap)
-require(RColorBrewer)
-require(colorspace)
+require(pheatmap,quietly=T)
+require(RColorBrewer,quietly=T)
+require(colorspace,quietly=T)
 if(is.null(COL)){
   if(ncol(motifP)<=8){
     COL <- brewer.pal(n = 8, name ="Dark2")[1:ncol(motifP)]
@@ -122,7 +124,7 @@ if(is.null(COL)){
 }
 #COL <- brewer.pal(n = 8, name ="Dark2")[1:ncol(motifP)]
 names(COL) <- colnames(motifP)
-print(COL)
+#print(COL)
 
 sMotif <- sort(motifP[motifP!=0])
 heatCOL <- colorRampPalette(brewer.pal(n = 7, name ="Oranges"))(min(length(sMotif)-2,10))#RdYlBu
@@ -147,8 +149,8 @@ gT$grobs[[4]] <- arrangeGrob(grobs=tmp,layout_matrix=lay)#,ncol=2
 plot(gT)
 #save(motifR,motifP,file="t.RData")
 # plot bulble plot for enrichment
-#print(motifR)
-require(ggplot2)
+cat("Plotting known motif bulble plots\n")
+require(ggplot2,quietly=T)
 X <- data.frame()
 rownames(motifP) <- sapply(strsplit(rownames(motifP),"\\/"),head,1)
 for(i in gsub("_bg$","",grep("_bg$",colnames(motifR),value=T))){
@@ -178,7 +180,7 @@ print(ggplot(X,aes(x=grp,y=motif))+geom_point(aes(size=enrichment,colour=sig))+s
               panel.background = element_blank()))
 
 ## homer motif -------
-require(htmltab)
+require(htmltab,quietly = T)
 #ori <- par(mar=c(2,7,max(c(0,(30-length(deNovo)*2))),1)+0.1,mgp=c(0.5,0,0),tcl=-0.1)
 names(COL) <- gsub("_logP","",names(COL))
 #print(COL)
@@ -189,6 +191,7 @@ for(i in strDir){
   ori <- par(mar=c(2,7,max(c(0,(30-length(deNovo)*2))),1)+0.1,mgp=c(0.5,0,0),tcl=-0.1)
   strMotif <- paste(i,"/homerResults.html",sep="")
   if(!file.exists(strMotif)) next
+  cat("Plotting deNovo motifs for",basename(i),"\n")
   motifs <- htmltab(strMotif,1,1)
   # obtain the motif names
   motifID <- c()
@@ -238,6 +241,6 @@ for(i in strDir){
   legend("bottomright",names(Col)[-1],col=Col[-1],lty=1:2,pch=15:16,box.lty=0,text.col=Col[-1])
 }
 par(ori)
-dev.off()
-cat("\nPlot motifs are successfully plotted\n")
+a <- dev.off()
+cat("\nMotifs are successfully plotted\n\n\n")
 
