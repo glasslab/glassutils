@@ -143,24 +143,28 @@ for(i in unique(pClass)){
 }
 dev.off()
 allDBP <- unique(allDBP)
-write.table(peakDef[allDBP,],file=paste(strOutput,"/allDCA.txt",sep=""),sep="\t",quote=F,col.names=F)
-require(pheatmap)
-subDBP <- allDBP[sample(length(allDBP),min(10000,length(allDBP)))]
-#save(normP,allDBP,subDBP,COL,pClass,file="test.RData")
-pdf(paste(strOutput,"/allDCA.pdf",sep=""),height = 9)#,onefile=FALSE
-pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),labels_row=rep("",length(subDBP)),
-         color = colorRampPalette(rev(brewer.pal(n = 11, name ="RdBu")))(20),
-         annotation_col = data.frame(row.names=colnames(normP),
-                                     grp=pClass))
-pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),scale="row",labels_row=rep("",length(subDBP)),
-         color = colorRampPalette(rev(brewer.pal(n = 11, name ="RdBu")))(20),
-         annotation_col = data.frame(row.names=colnames(normP),
-                                     grp=pClass))
-pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),scale="row",labels_row=rep("",length(subDBP)),
-         color = colorRampPalette(rev(brewer.pal(n = 11, name ="RdBu")))(20),cluster_cols=F,
-         annotation_col = data.frame(row.names=colnames(normP),
-                                     grp=pClass))
-dev.off()
+if(length(allDBP)>2){
+  write.table(peakDef[allDBP,],file=paste(strOutput,"/allDCA.txt",sep=""),sep="\t",quote=F,col.names=F)
+  require(pheatmap)
+  subDBP <- allDBP[sample(length(allDBP),min(10000,length(allDBP)))]
+  #save(normP,allDBP,subDBP,COL,pClass,file="test.RData")
+  pdf(paste(strOutput,"/allDCA.pdf",sep=""),height = 9)#,onefile=FALSE
+  pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),labels_row=rep("",length(subDBP)),
+           color = colorRampPalette(rev(brewer.pal(n = 11, name ="RdBu")))(20),
+           annotation_col = data.frame(row.names=colnames(normP),
+                                       grp=pClass))
+  pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),scale="row",labels_row=rep("",length(subDBP)),
+           color = colorRampPalette(rev(brewer.pal(n = 11, name ="RdBu")))(20),
+           annotation_col = data.frame(row.names=colnames(normP),
+                                       grp=pClass))
+  pheatmap(normP[subDBP,],annotation_colors=list(grp=COL),scale="row",labels_row=rep("",length(subDBP)),
+           color = colorRampPalette(rev(brewer.pal(n = 11, name ="RdBu")))(20),cluster_cols=F,
+           annotation_col = data.frame(row.names=colnames(normP),
+                                       grp=pClass))
+  dev.off()
+}else{
+  cat(length(allDBP),"DCA peaks, ignore plotting heatmap!\n")
+}
 cat("\n\nATACdiff is finished successfully!\n\n")
 
 
