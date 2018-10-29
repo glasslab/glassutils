@@ -65,6 +65,7 @@ require(grImport,quietly=T)
 require(gridExtra,quietly=T)
 selMotif <- motifP <- motifR <- c()
 logos <- list()
+#cat(strDir)
 for(i in strDir){
   strMotif <- paste(i,"/knownResults.txt",sep="")
   if(file.exists(strMotif)){
@@ -141,9 +142,9 @@ tmp <- list()
 lay <- c()
 for(i in sapply(strsplit(gT$grobs[[4]]$label,"\\/"),head,1)){
   tmp <- c(tmp,
-           list(textGrob(i)),
+           list(textGrob(i,x = unit(0, "npc"),just="left")),
            list(pictureGrob(logos[[i]])))
-  lay <- rbind(lay,max(c(0,lay))+c(1,2,2))
+  lay <- rbind(lay,max(c(0,lay))+c(1,2,2,2))
 }
 gT$grobs[[4]] <- arrangeGrob(grobs=tmp,layout_matrix=lay)#,ncol=2
 plot(gT)
