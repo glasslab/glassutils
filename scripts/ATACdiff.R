@@ -104,7 +104,7 @@ for(i in unique(pClass)){
   for(j in unique(pClass)){
     if(i==j) next
     res <- results(dds,contrast = c("grp",i,j))
-    write.table(cbind(data.frame(res),contrast=paste(i,j,sep="-")),file=paste(strOutput,"/DCA_",j,".vs.",i,".txt"),sep="\t",quote=F,col.names=NA)
+    write.table(cbind(data.frame(res),contrast=paste(i,j,sep="-")),file=paste(strOutput,"/DCA_",j,".vs.",i,".txt",sep=""),sep="\t",quote=F,col.names=NA)
     peakID <- c(peakID,rownames(res)[!is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]>logFC])
     ## pairwised ploting
     x <- apply(normP[,pClass==i,drop=F],1,mean)
