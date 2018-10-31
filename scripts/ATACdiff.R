@@ -27,7 +27,7 @@ distal <- as.numeric(args[2])
 strOutput <- paste(dirname(strTags),"/",sep="")
 logFC <- 1
 sID <- strInfo <- pClass <- NULL
-require(getopt)
+require(getopt,quietly=T)
 spec <- matrix(c("strInfo","f",2,"character",
                  "pClass","s",2,"character",
                  "output","o",2,"character",
@@ -65,29 +65,34 @@ if(is.null(sID)){
 }
 ## process ------
 rawTags <- read.table(strTags,as.is=T,sep="\t",header=T,row.names=1,quote="",comment.char="",check.names=F)
+cat("Total peaks:",nrow(rawTags),"\n")
 rawC <- as.matrix(rawTags[,-(1:18)])
 if(ncol(rawC)!=length(pClass)) stop(paste("ERROR:",strTags,"(",ncol(rawC),") contains different sample number from the group codes(",length(pClass),") (eigher -f or -s)."))
 write.table(cbind(idInUse=sID,tagName=basename(sapply(strsplit(colnames(rawC)," "),head,1)),group=pClass),file=paste(strOutput,"sID.txt",sep=""),sep="\t",row.names=F)
 colnames(rawC) <- sID
 
-distalC <- rawC[(is.na(rawTags$'Distance to TSS')|rawTags$'Distance to TSS'>distal)&grepl("Intergenic",rawTags$Annotation,ignore.case=T),]
+distalC <- rawC[(is.na(rawTags$'Distance to TSS')|rawTags$'Distance to TSS'>distal),]#&grepl("Intergenic",rawTags$Annotation,ignore.case=T)
 if(distal<1000) distalC <- rawC[is.na(rawTags$'Distance to TSS')|rawTags$'Distance to TSS'>distal,]
-distalC <- distalC[apply(distalC,1,function(x){return(sum(x>8))})>1,]
+#distalC <- distalC[apply(distalC,1,function(x){return(sum(x>8))})>1,]
 ## DESeq2 -----
-require(DESeq2)
+cat("Total distal peaks:",nrow(distalC),"\n")
+require(DESeq2,quietly=T)
 pheno <- data.frame(row.names = colnames(distalC),grp=pClass)
 D <- DESeqDataSetFromMatrix(countData=matrix(as.integer(distalC),nrow=nrow(distalC),dimnames=dimnames(distalC)),
                             colData=pheno,
                             design=as.formula(paste("~",paste(colnames(pheno),collapse="+"))))
-dds <- DESeq(D,betaPrior=TRUE)
+dds <- DESeq(D,betaPrior=TRUE,quiet=T)
 ## extract target peaks ------
 peakDef <- rawTags[rownames(distalC),1:4]
 normP <- log2(counts(dds,normalized=T)+1)
 allDBP <- c()
-require(gplots)
-require(MASS)
-require(RColorBrewer)
-require(colorspace)
+sink("00000tmp")
+require(gplots,quietly=T)
+require(MASS,quietly=T)
+require(RColorBrewer,quietly=T)
+require(colorspace,quietly=T)
+sink()
+unlink("00000tmp")
 if(is.null(COL)){
   if(length(unique(pClass))<=8){
     COL <- brewer.pal(n = 8, name ="Dark2")[1:length(unique(pClass))]
@@ -141,11 +146,11 @@ for(i in unique(pClass)){
               file=paste(strOutput,i,"_bg.txt",sep=""),
               sep="\t",quote=F,col.names=F)
 }
-dev.off()
+tmp <- dev.off()
 allDBP <- unique(allDBP)
 if(length(allDBP)>2){
   write.table(peakDef[allDBP,],file=paste(strOutput,"/allDCA.txt",sep=""),sep="\t",quote=F,col.names=F)
-  require(pheatmap)
+  require(pheatmap,quietly=T)
   subDBP <- allDBP[sample(length(allDBP),min(10000,length(allDBP)))]
   #save(normP,allDBP,subDBP,COL,pClass,file="test.RData")
   pdf(paste(strOutput,"/allDCA.pdf",sep=""),height = 9)#,onefile=FALSE
@@ -161,7 +166,7 @@ if(length(allDBP)>2){
            color = colorRampPalette(rev(brewer.pal(n = 11, name ="RdBu")))(20),cluster_cols=F,
            annotation_col = data.frame(row.names=colnames(normP),
                                        grp=pClass))
-  dev.off()
+  tmp <- dev.off()
 }else{
   cat(length(allDBP),"DCA peaks, ignore plotting heatmap!\n")
 }

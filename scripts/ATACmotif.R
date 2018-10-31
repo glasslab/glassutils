@@ -60,6 +60,7 @@ if(is.null(hIndex)) for(i in basename(strDir)) hIndex[[i]] <- deNovo
 
 #print(strDir)
 pdf(strPDF,width=9)
+par(bg=NA)
 ## known motif -------
 require(grImport,quietly=T)
 require(gridExtra,quietly=T)
@@ -91,7 +92,8 @@ for(i in strDir){
     }
     if(nrow(lay)<15) lay <- rbind(lay,matrix(1+max(lay),nrow=15-nrow(lay),ncol=ncol(lay)))
     #save(logos,one,oneTable,kIndex,file="t.RData")
-    plot(arrangeGrob(grobs=oneTable,layout_matrix=lay,top=basename(i)))#ncol=4
+    plot.new()
+    grid.draw(arrangeGrob(grobs=oneTable,layout_matrix=lay,top=basename(i)))#ncol=4
     #stop()
     # logP
     motifP <- merge(motifP,-one[,2,drop=F],by="row.names",all=T)
@@ -147,7 +149,8 @@ for(i in sapply(strsplit(gT$grobs[[4]]$label,"\\/"),head,1)){
   lay <- rbind(lay,max(c(0,lay))+c(1,2,2,2))
 }
 gT$grobs[[4]] <- arrangeGrob(grobs=tmp,layout_matrix=lay)#,ncol=2
-plot(gT)
+plot.new()
+grid.draw(gT)
 #save(motifR,motifP,file="t.RData")
 # plot bubble plot for enrichment
 cat("Plotting known motif bubble plots\n")
@@ -215,7 +218,8 @@ for(i in strDir){
     lay <- rbind(lay,max(lay)+lay[1,])
   }
   if(nrow(lay)<15) lay <- rbind(lay,matrix(1+max(lay),nrow=15-nrow(lay),ncol=ncol(lay)))
-  plot(arrangeGrob(grobs=oneTable,layout_matrix=lay,top=basename(i)))#ncol=4
+  plot.new()
+  grid.draw(arrangeGrob(grobs=oneTable,layout_matrix=lay,top=basename(i)))#ncol=4
 
   # obtain the motif info
   motifs <- motifs[rev(deNovo),]
