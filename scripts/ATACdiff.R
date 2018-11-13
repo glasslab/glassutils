@@ -71,8 +71,8 @@ if(ncol(rawC)!=length(pClass)) stop(paste("ERROR:",strTags,"(",ncol(rawC),") con
 write.table(cbind(idInUse=sID,tagName=basename(sapply(strsplit(colnames(rawC)," "),head,1)),group=pClass),file=paste(strOutput,"sID.txt",sep=""),sep="\t",row.names=F)
 colnames(rawC) <- sID
 
-distalC <- rawC[(is.na(rawTags$'Distance to TSS')|rawTags$'Distance to TSS'>distal),]#&grepl("Intergenic",rawTags$Annotation,ignore.case=T)
-if(distal<1000) distalC <- rawC[is.na(rawTags$'Distance to TSS')|rawTags$'Distance to TSS'>distal,]
+distalC <- rawC[(is.na(rawTags$'Distance to TSS')|abs(rawTags$'Distance to TSS')>distal),]#&grepl("Intergenic",rawTags$Annotation,ignore.case=T)
+if(distal<1000) distalC <- rawC[is.na(rawTags$'Distance to TSS')|abs(rawTags$'Distance to TSS')>distal,]
 #distalC <- distalC[apply(distalC,1,function(x){return(sum(x>8))})>1,]
 ## DESeq2 -----
 cat("Total distal peaks:",nrow(distalC),"\n")

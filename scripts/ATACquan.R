@@ -19,7 +19,7 @@ if(length(args)<2){
   cat("\t\tand located in the same folder as tag directory list file.\n")
   cat("\t/path/to/the/result/folder/: (optional use -o) A path to a folder where the out put files will be saved.\n\t\tDefault: the folder where the tag directory list file is.\n")
   cat("\tdistal: (optional use -d) A number indicate the distance in bp from TSS to be considering distal region. defaul 1000\n")
-  cat("\tsize: (optional use -s) A number indicate the Peak size[from center of peak]. defaul 200\n")
+  cat("\tsize: (optional use -s) A number indicate the Peak size[from center of peak]. defaul given\n")
 
   cat("\n\teg: ATACquan.R quanTags.txt mm10 -o /home/z5ouyang/quan/\n")
   cat("\n\n")
@@ -32,7 +32,7 @@ tagInfo <- read.table(strTags,sep="\t",row.names=1,as.is = T)
 strOutput <- strPath <- paste(dirname(strTags),"/",sep="")
 strPeaks <- paste(strPath,rownames(tagInfo),"_idr.txt",sep="")
 distal <- 1000
-pSize <- 200
+pSize <- "given"
 require(getopt)
 spec <- matrix(c("peaks","f",2,"character",
                  "output","o",2,"character",
@@ -50,7 +50,7 @@ if(!dir.exists(strTmp)) dir.create(strTmp)
 strPeak <- strPeaks
 if(length(strPeaks)>1){
   strPeak <- paste(strTmp,"allPeaks",sep="")
-  system(paste("mergePeaks -d",pSize,paste(strPeaks,collapse=" "),">",strPeak))
+  system(paste("mergePeaks -d",pSize,paste(strPeaks,collapse=" "),">",strPeak))#
 }
 
 ## annotate peaks on tag directories ------
