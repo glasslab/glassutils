@@ -25,7 +25,7 @@ if(length(args)<2){
   q()
 }
 ## input ----
-motifchar <- 50
+motifchar <- 200
 strInput <- args[1]
 topN <- as.numeric(args[2])
 strPDF <- NULL
@@ -80,8 +80,8 @@ for(i in strDir){
     lay <- matrix(c(1,1,2,2,2,3,4),nrow=1)
     for(j in as.numeric(kIndex[[basename(i)]])){
       strLogo <- paste(i,"/knownResults/known",j,".logo.svg",sep="")
-      system(paste("inkscape ",strLogo," --export-ps=",gsub("svg$","ps",strLogo),sep=""))
-      PostScriptTrace(gsub("svg$","ps",strLogo),gsub("svg$","xml",strLogo))
+      if(!file.exists(gsub("svg$","ps",strLogo))) system(paste("inkscape ",strLogo," --export-ps=",gsub("svg$","ps",strLogo),sep=""))
+      if(!file.exists(gsub("svg$","xml",strLogo))) PostScriptTrace(gsub("svg$","ps",strLogo),gsub("svg$","xml",strLogo))
       logos[[sapply(strsplit(one[j,1],"\\/"),head,1)]] <- readPicture(gsub("svg$","xml",strLogo))
       oneTable <- c(oneTable,
                     list(textGrob(sapply(strsplit(one[j,1],"\\/"),head,1))),
@@ -128,26 +128,33 @@ if(is.null(COL)){
 #COL <- brewer.pal(n = 8, name ="Dark2")[1:ncol(motifP)]
 names(COL) <- colnames(motifP)
 #print(COL)
-
+clusterCall <- function(hc, mat){
+  sv = mat[,ncol(mat)]-mat[,1]
+  dend = reorder(as.dendrogram(hc), wts = sv)
+  as.hclust(dend)
+}
 sMotif <- sort(motifP[motifP!=0])
 heatCOL <- colorRampPalette(brewer.pal(n = 7, name ="Oranges"))(min(length(sMotif)-2,10))#RdYlBu
 br <- c(0,sMotif[floor(seq(1,length(sMotif)-1,length.out=length(heatCOL)-1))]-min(diff(sMotif))/10,max(sMotif)+min(diff(sMotif))/10)
-pHeat <- pheatmap(motifP,cluster_cols=F,annotation_colors=list(grp=COL),
-                  color = heatCOL,
+pHeat <- pheatmap(motifP,cluster_cols=F,annotation_colors=list(grp=COL),clustering_method="ward.D",
+                  color = heatCOL,clustering_callback = clusterCall,
                   breaks=br,
                   annotation_col=data.frame(row.names=colnames(motifP),
                                             grp=colnames(motifP)))#,silent = T
-#save(pHeat,logos,file="t.RData")
+#save(pHeat,logos,file="pHeatLogo.RData")
 # plot known motif logo
 gT <- pHeat$gtable
 tmp <- list()
 lay <- c()
+#cat(paste(sapply(strsplit(gT$grobs[[4]]$label,"\\/"),head,1),collapse="\n"))
 for(i in sapply(strsplit(gT$grobs[[4]]$label,"\\/"),head,1)){
+  #cat("logo",i,"\n")
   tmp <- c(tmp,
            list(textGrob(i,x = unit(0, "npc"),just="left")),
            list(pictureGrob(logos[[i]])))
   lay <- rbind(lay,max(c(0,lay))+c(1,2,2,2))
 }
+#save(gT,file="gT.RData")
 gT$grobs[[4]] <- arrangeGrob(grobs=tmp,layout_matrix=lay)#,ncol=2
 plot.new()
 grid.draw(gT)
