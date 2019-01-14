@@ -6,11 +6,11 @@
 args <- commandArgs(trailingOnly=TRUE)
 if(length(args)<4){
   cat("\n\nO'Young:\nPlot violin and tSNE of given gene expression for single cell RNAseq:\n")
-  info <- data.frame(row.names=c("usage:","<assay type>:","<sc Name>:","<gene1>[;gene2;gene3,...]:","</path/to/a/.pdf>:","e.g.:"),
+  info <- data.frame(row.names=c("usage:","<assay type>:","<sc Name>:","<gene1>[,gene2;gene3,...]:","</path/to/a/.pdf>:","e.g.:"),
                      info=c("scRNAplotGene.R <assay type> <sc Name> <gene1>[,gene2,gene3,...] </path/to/a/.pdf>",
                             "The type of the assay, e.g. RNA",
                             "The name of the single cell name (detail from scList.R)",
-                            "A list of gene symbols separated by ';'",
+                            "A list of gene symbols separated by ','",
                             "A pdf file name including the path",
                             "scRNAplotGene.R RNA hg38_GBM_Tumor1 SEPP1,CD48 scGENE.pdf"))
   colnames(info) <- NULL

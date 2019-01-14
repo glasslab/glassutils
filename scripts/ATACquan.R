@@ -19,7 +19,7 @@ if(length(args)<2){
   cat("\t\tand located in the same folder as tag directory list file.\n")
   cat("\t/path/to/the/result/folder/: (optional use -o) A path to a folder where the out put files will be saved.\n\t\tDefault: the folder where the tag directory list file is.\n")
   cat("\tdistal: (optional use -d) A number indicate the distance in bp from TSS to be considering distal region. defaul 1000\n")
-  cat("\tsize: (optional use -s) A number indicate the Peak size[from center of peak]. defaul given\n")
+  cat("\tsize: (optional use -s) A number indicate the Peak size. defaul given\n")
 
   cat("\n\teg: ATACquan.R quanTags.txt mm10 -o /home/z5ouyang/quan/\n")
   cat("\n\n")
