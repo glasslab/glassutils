@@ -1,4 +1,4 @@
-#!/bioinformatics/bioinformatics/anaconda3/bin/Rscript
+#!/bioinformatics/anaconda3_2019Jan/bin/Rscript
 #############################
 ## scRNAmarker.R
 ##
