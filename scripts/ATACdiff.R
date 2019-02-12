@@ -1,4 +1,4 @@
-#!/bioinformatics/anaconda3_2019Jan/bin/Rscript
+#!/usr/bin/env Rscript
 ####################################################
 ## ATACdiff.R
 ##
@@ -13,7 +13,7 @@ if(length(args)<2){
   cat("\tdistal: A number indicate the distance in bp from TSS to be considering distal region. Only the peaks in the distal region will be considered for analyses\n")
   cat("\t/path/to/the/file/listed/sample/tag/directories: (optional use -f, one of -f/-s is required) The file contains path of tag directories,\n")
   cat("\t\t which used to generate raw tag annotatioin by 'ATACquan.R', where the group codes for all samples are indicated.\n")
-  cat("\t/group/code/list: (optional use -s, one of -f/-s is required) <group code1>;<group code2>[;group code3;...], specify all samples included in the annotated raw tag file.\n")
+  cat("\t/group/code/list: (optional use -s, one of -f/-s is required) <group code1>,<group code2>[,group code3,...], specify all samples included in the annotated raw tag file.\n")
   cat("\t/path/to/the/result/folder/: (optional use -o) A path to a folder where the out put files will be saved.\n\t\tDefault: the folder where the annotated raw tag file is.\n")
   cat("\tlogFC: (optional use -l) A number indicates the cut-off of logFC. Defaul 1 (2 Fold Change).\n")
   
@@ -34,7 +34,7 @@ spec <- matrix(c("strInfo","f",2,"character",
                  "logFC","l",2,"character"),byrow=TRUE, ncol=4)
 options = getopt(spec,opt=commandArgs(trailingOnly=TRUE)[-c(1:2)])
 if(sum(names(options)=="strInfo")==1) strInfo <- options$strInfo
-if(sum(names(options)=="pClass")==1) pClass <- unlist(strsplit(options$pClass,";"))
+if(sum(names(options)=="pClass")==1) pClass <- unlist(strsplit(options$pClass,","))
 if(sum(names(options)=="output")==1) strOutput <- options$output
 if(sum(names(options)=="logFC")==1) logFC <- options$logFC
 if(is.null(strInfo)&&is.null(pClass)){

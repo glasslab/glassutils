@@ -1,4 +1,4 @@
-#!/bioinformatics/anaconda3_2019Jan/bin/Rscript
+#!/usr/bin/env Rscript
 ############################################
 ## alignStats.R
 ## 
@@ -54,6 +54,7 @@ for(i in strDir){
   stat[i,"homerTotal"] <- as.numeric(res[1,"Total.Tags"])#grepl("genome=",res[,1])
   stat[i,"tagPosition"] <- res[1,"Total.Tags"]/res[1,"Unique.Positions"]
   stat[i,"homerAvgLength"] <- as.numeric(gsub("averageTagLength=","",res[grepl("averageTagLength",res[,1]),1]))
+  if(file.exists(paste(i,"/tagInfo_with_M.txt",sep=""))) res <- read.table(paste(i,"/tagInfo_with_M.txt",sep=""),sep="\t",as.is=T,header=T)
   index <- res[,1]=="chrM"
   if(sum(index)==1){
     stat[i,"mitoNum"] <- as.numeric(res[index,"Total.Tags"])

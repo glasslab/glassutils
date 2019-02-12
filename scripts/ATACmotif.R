@@ -1,4 +1,4 @@
-#!/bioinformatics/anaconda3_2019Jan/bin/Rscript
+#!/usr/bin/env Rscript
 #########################################
 ## ATACmotif.R
 ##

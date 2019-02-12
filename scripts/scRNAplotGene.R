@@ -1,4 +1,4 @@
-#!/bioinformatics/bioinformatics/anaconda3/bin/Rscript
+#!/usr/bin/env Rscript
 #############################
 ## scRNAplotGene.R
 ##
