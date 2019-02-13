@@ -84,6 +84,7 @@ D <- DESeqDataSetFromMatrix(countData=matrix(as.integer(distalC),nrow=nrow(dista
 dds <- DESeq(D,betaPrior=TRUE,quiet=T)
 ## extract target peaks ------
 peakDef <- rawTags[rownames(distalC),1:4]
+write.table(peakDef,file=paste(strOutput,"/DCA_allDistal.peak",sep=""),sep="\t",quote=F,col.names=NA)
 normP <- log2(counts(dds,normalized=T)+1)
 allDBP <- c()
 sink("00000tmp")
