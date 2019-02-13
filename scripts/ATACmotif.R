@@ -167,36 +167,35 @@ mNames <- sapply(strsplit(rownames(motifP),"\\/"),head,1)
 if(sum(duplicated(mNames))>0){
   cat("duplicated motif names:\n",paste(rownames(motifP)[mNames%in%mNames[duplicated(mNames)]],collapse="\n"),"\n\n")
   mNames[duplicated(mNames)] <- paste(mNames[duplicated(mNames)],"_1",sep="")
-  cat(paste(mNames,collapse="\n"),"\n")
+  cat("Skip bubble plot ...\n")
+}else{
+  rownames(motifP) <- mNames
+  for(i in gsub("_bg$","",grep("_bg$",colnames(motifR),value=T))){
+    #print(paste(i,"bg",sep="_"))
+    X <- rbind(X,data.frame(grp=i,#motif=substr(rownames(motifR),1,apply(cbind(nchar(rownames(motifR)),motifchar),1,min)),
+                            motif = factor(sapply(strsplit(rownames(motifR),"\\/"),head,1),
+                                           levels=rev(sapply(strsplit(pHeat$gtable$grobs[[4]]$label,"\\/"),head,1))),
+                            enrichment=motifR[,paste(i,"target",sep="_")]/motifR[,paste(i,"bg",sep="_")],
+                            target=motifR[,paste(i,"target",sep="_")],
+                            sig=motifP[sapply(strsplit(rownames(motifR),"\\/"),head,1),paste(i,"logP",sep="_")]))
+  }
+  
+  print(ggplot(X,aes(x=grp,y=motif))+geom_point(aes(size=enrichment,colour=target))+scale_size_continuous(range = c(1,10))+
+          scale_color_gradient(low="#fee5d9", high="#a50f15")+
+          theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(), axis.line =element_blank(),
+                axis.text.x = element_text(angle = 45, hjust = 1,size=15),
+                axis.text.y = element_text(hjust = 1,size=15),
+                panel.background = element_blank()))
+  
+  print(ggplot(X,aes(x=grp,y=motif))+geom_point(aes(size=enrichment,colour=sig))+scale_size_continuous(range = c(1,10))+
+          scale_color_gradient(low=heatCOL[1], high=tail(heatCOL,1))+
+          theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(), axis.line =element_blank(),
+                axis.text.x = element_text(angle = 45, hjust = 1,size=15),
+                axis.text.y = element_text(hjust = 1,size=15),
+                panel.background = element_blank()))
 }
-rownames(motifP) <- mNames
-
-
-for(i in gsub("_bg$","",grep("_bg$",colnames(motifR),value=T))){
-  #print(paste(i,"bg",sep="_"))
-  X <- rbind(X,data.frame(grp=i,#motif=substr(rownames(motifR),1,apply(cbind(nchar(rownames(motifR)),motifchar),1,min)),
-                          motif = factor(sapply(strsplit(rownames(motifR),"\\/"),head,1),
-                                         levels=rev(sapply(strsplit(pHeat$gtable$grobs[[4]]$label,"\\/"),head,1))),
-                          enrichment=motifR[,paste(i,"target",sep="_")]/motifR[,paste(i,"bg",sep="_")],
-                          target=motifR[,paste(i,"target",sep="_")],
-                          sig=motifP[sapply(strsplit(rownames(motifR),"\\/"),head,1),paste(i,"logP",sep="_")]))
-}
-
-print(ggplot(X,aes(x=grp,y=motif))+geom_point(aes(size=enrichment,colour=target))+scale_size_continuous(range = c(1,10))+
-        scale_color_gradient(low="#fee5d9", high="#a50f15")+
-        theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(), axis.line =element_blank(),
-              axis.text.x = element_text(angle = 45, hjust = 1,size=15),
-              axis.text.y = element_text(hjust = 1,size=15),
-              panel.background = element_blank()))
-
-print(ggplot(X,aes(x=grp,y=motif))+geom_point(aes(size=enrichment,colour=sig))+scale_size_continuous(range = c(1,10))+
-        scale_color_gradient(low=heatCOL[1], high=tail(heatCOL,1))+
-        theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(), axis.line =element_blank(),
-              axis.text.x = element_text(angle = 45, hjust = 1,size=15),
-              axis.text.y = element_text(hjust = 1,size=15),
-              panel.background = element_blank()))
 
 ## homer motif -------
 require(htmltab,quietly = T)
