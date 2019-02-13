@@ -103,7 +103,7 @@ if(is.null(COL)){
 }
 pdf(paste(strOutput,"/pairwised_DCA.pdf",sep=""),width=4,height=4)
 par(mar=c(2,2,0,0)+0.2,mgp=c(1,0.1,0),tcl=-0.05)
-imageCOL <- c("#FFFFFFFF",colorpanel(20,"#3300FFFF","#00FFFFFF","#CCFF00FF"),colorpanel(20,"#CCFF00FF","#FF9900FF","#AA0000FF"))
+imageCOL <- c("#FFFFFFFF",colorpanel(20,"#3300FF60","#00FFFF60","#CCFF0060"),colorpanel(20,"#CCFF00FF","#FF9900FF","#AA0000FF"))
 for(i in unique(pClass)){
   peakID <- c()
   for(j in unique(pClass)){
@@ -111,30 +111,44 @@ for(i in unique(pClass)){
     res <- results(dds,contrast = c("grp",i,j))
     write.table(cbind(data.frame(res),contrast=paste(i,j,sep="-")),file=paste(strOutput,"/DCA_",j,".vs.",i,".txt",sep=""),sep="\t",quote=F,col.names=NA)
     peakID <- c(peakID,rownames(res)[!is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]>logFC])
-    ## pairwised ploting
+    ## pairwised peaks & ploting
+    xIndex <- !is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]>logFC
+    yIndex <- !is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]< -logFC
+    write.table(peakDef[rownames(res)[xIndex],],file=paste(strOutput,"/DCA_",j,".vs.",i,"_",i,".peak",sep=""),sep="\t",quote=F,col.names=NA)
+    write.table(peakDef[rownames(res)[yIndex],],file=paste(strOutput,"/DCA_",j,".vs.",i,"_",j,".peak",sep=""),sep="\t",quote=F,col.names=NA)
+    
+    Col <- rep("gray",nrow(normP))
+    Col[xIndex] <- COL[i]
+    Col[yIndex] <- COL[j]
+    
     x <- apply(normP[,pClass==i,drop=F],1,mean)
     y <- apply(normP[,pClass==j,drop=F],1,mean)
     xlim <- range(x)
     ylim <- range(y)
     xlab <- paste(i,": log2 Mean normalized tag",sep="")
     ylab <- paste(j,": log2 Mean normalized tag",sep="")
-    tryM <- try(f1 <- kde2d(x,y,n=200),silent=T)
-    if(is.null(names(tryM))){
-      plot(c(),c(),xlab=xlab,ylab=ylab)
-      index <- rep(T,nrow(normP))
-    }else{
-      image(f1,col=imageCOL,xlab=xlab,ylab=ylab,xlim=xlim,ylim=ylim)
-      imageZero <- diff(range(f1$z))/length(imageCOL)
-      index <- apply(cbind(x,y),1,function(x,fit,cutZero){return(fit$z[sum((x[1]-fit$x)>=0),sum((x[2]-fit$y)>=0)]<cutZero)},f1,imageZero)
+    
+    plot(c(),c(),xlab=xlab,ylab=ylab,xlim=xlim,ylim=ylim)
+    for(i in c("gray",COL)){
+      if(i == "gray"){
+        tryM <- try(f1 <- MASS::kde2d(x[Col==i],y[Col==i],n=100),silent=T)
+        if(is.null(names(tryM))){
+          index <- rep(T,sum(Col==i))
+        }else{
+          image(f1,col=imageCOL,add=T)
+          imageZero <- diff(range(f1$z))/length(imageCOL)
+          index <- apply(cbind(x,y),1,function(x,fit,cutZero){return(fit$z[sum((x[1]-fit$x)>=0),sum((x[2]-fit$y)>=0)]<cutZero)},f1,imageZero)
+        }
+      }else{
+        index <- rep(T,sum(Col==i))
+      }
+      points(x[Col==i][index],y[Col==i][index],pch=20,col=i,cex=1)
     }
-    points(x[index],y[index],col=imageCOL[2],pch=20)
     lines(range(c(xlim,ylim)),range(c(xlim,ylim)),col="gray")
     lines(range(c(xlim,ylim)),range(c(xlim,ylim))+logFC,col="gray",lty=2)
     lines(range(c(xlim,ylim)),range(c(xlim,ylim))-logFC,col="gray",lty=2)
-    legend("topleft",paste(j,": ",sum(!is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]< -logFC)," peaks",sep=""),
-           box.lty=0,text.col=COL[j])
-    legend("bottomright",paste(i,": ",sum(!is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]>logFC)," peaks",sep=""),
-           box.lty=0,text.col=COL[i])
+    mtext(paste(j,": ",sum(yIndex),sep=""),3,line=-1,adj=0.1,col=COL[j])
+    mtext(paste(i,": ",sum(xIndex),sep=""),4,line=-1,adj=0.1,col=COL[i])
   }
   peakID <- unique(peakID)
   allDBP <- c(allDBP,peakID)
