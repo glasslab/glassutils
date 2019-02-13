@@ -103,7 +103,7 @@ if(is.null(COL)){
 }
 pdf(paste(strOutput,"/pairwised_DCA.pdf",sep=""),width=4,height=4)
 par(mar=c(2,2,0,0)+0.2,mgp=c(1,0.1,0),tcl=-0.05)
-imageCOL <- c("#FFFFFFFF",colorpanel(20,"#3300FF60","#00FFFF60","#CCFF0060"),colorpanel(20,"#CCFF00FF","#FF9900FF","#AA0000FF"))
+imageCOL <- c("#FFFFFFFF",colorpanel(20,"gray","#00FFFF","#CCFF00"),colorpanel(20,"#CCFF00FF","#FF9900FF","#AA0000FF"))
 for(i in unique(pClass)){
   peakID <- c()
   for(j in unique(pClass)){
@@ -137,7 +137,7 @@ for(i in unique(pClass)){
         }else{
           image(f1,col=imageCOL,add=T)
           imageZero <- diff(range(f1$z))/length(imageCOL)
-          index <- apply(cbind(x,y),1,function(x,fit,cutZero){return(fit$z[sum((x[1]-fit$x)>=0),sum((x[2]-fit$y)>=0)]<cutZero)},f1,imageZero)
+          index <- apply(cbind(x[Col==k],y[Col==k]),1,function(x,fit,cutZero){return(fit$z[sum((x[1]-fit$x)>=0),sum((x[2]-fit$y)>=0)]<cutZero)},f1,imageZero)
         }
       }else{
         index <- rep(T,sum(Col==k))
