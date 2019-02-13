@@ -129,20 +129,20 @@ for(i in unique(pClass)){
     ylab <- paste(j,": log2 Mean normalized tag",sep="")
     
     plot(c(),c(),xlab=xlab,ylab=ylab,xlim=xlim,ylim=ylim)
-    for(i in c("gray",COL)){
-      if(i == "gray"){
-        tryM <- try(f1 <- MASS::kde2d(x[Col==i],y[Col==i],n=100),silent=T)
+    for(k in c("gray",COL[c(i,j)])){
+      if(k == "gray"){
+        tryM <- try(f1 <- MASS::kde2d(x[Col==k],y[Col==k],n=100),silent=T)
         if(is.null(names(tryM))){
-          index <- rep(T,sum(Col==i))
+          index <- rep(T,sum(Col==k))
         }else{
           image(f1,col=imageCOL,add=T)
           imageZero <- diff(range(f1$z))/length(imageCOL)
           index <- apply(cbind(x,y),1,function(x,fit,cutZero){return(fit$z[sum((x[1]-fit$x)>=0),sum((x[2]-fit$y)>=0)]<cutZero)},f1,imageZero)
         }
       }else{
-        index <- rep(T,sum(Col==i))
+        index <- rep(T,sum(Col==k))
       }
-      points(x[Col==i][index],y[Col==i][index],pch=20,col=i,cex=1)
+      points(x[Col==k][index],y[Col==k][index],pch=20,col=k,cex=1)
     }
     lines(range(c(xlim,ylim)),range(c(xlim,ylim)),col="gray")
     lines(range(c(xlim,ylim)),range(c(xlim,ylim))+logFC,col="gray",lty=2)
