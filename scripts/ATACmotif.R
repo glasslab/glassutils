@@ -165,8 +165,9 @@ require(ggplot2,quietly=T)
 X <- data.frame()
 mNames <- sapply(strsplit(rownames(motifP),"\\/"),head,1)
 if(sum(duplicated(mNames))>0){
-  cat("duplicated motif names:\n",paste(rownames(motifP)[mNames%in%mNames[duplicated(mNames)]],sep="\n"),"\n\n")
+  cat("duplicated motif names:\n",paste(rownames(motifP)[mNames%in%mNames[duplicated(mNames)]],collapse="\n"),"\n\n")
   mNames[duplicated(mNames)] <- paste(mNames[duplicated(mNames)],"_1",sep="")
+  cat(paste(mNames,collapse="\n"),"\n")
 }
 rownames(motifP) <- mNames
 
