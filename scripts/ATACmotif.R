@@ -163,7 +163,14 @@ grid.draw(gT)
 cat("Plotting known motif bubble plots\n")
 require(ggplot2,quietly=T)
 X <- data.frame()
-rownames(motifP) <- sapply(strsplit(rownames(motifP),"\\/"),head,1)
+mNames <- sapply(strsplit(rownames(motifP),"\\/"),head,1)
+if(sum(duplicated(mNames))>0){
+  cat("duplicated motif names:\n",paste(rownames(motifP)[mNames%in%mNames[duplicated(mNames)]],sep="\n"),"\n\n")
+  mNames[duplicated(mNames)] <- paste(mNames[duplicated(mNames)],"_1",sep="")
+}
+rownames(motifP) <- mNames
+
+
 for(i in gsub("_bg$","",grep("_bg$",colnames(motifR),value=T))){
   #print(paste(i,"bg",sep="_"))
   X <- rbind(X,data.frame(grp=i,#motif=substr(rownames(motifR),1,apply(cbind(nchar(rownames(motifR)),motifchar),1,min)),
