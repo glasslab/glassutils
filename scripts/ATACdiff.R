@@ -113,17 +113,17 @@ for(i in unique(pClass)){
     write.table(cbind(data.frame(res),contrast=paste(i,j,sep="-")),file=paste(strOutput,"/DCA_",j,".vs.",i,".txt",sep=""),sep="\t",quote=F,col.names=NA)
     peakID <- c(peakID,rownames(res)[!is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]>logFC])
     ## pairwised peaks & ploting
-    xIndex <- !is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]>logFC
-    yIndex <- !is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"]< -logFC
+    xIndex <- !is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"] > logFC
+    yIndex <- !is.na(res[,"padj"])&res[,"padj"]<0.05&res[,"log2FoldChange"] < -logFC
     write.table(peakDef[rownames(res)[xIndex],],file=paste(strOutput,"/DCA_",j,".vs.",i,"_",i,".peak",sep=""),sep="\t",quote=F,col.names=NA)
     write.table(peakDef[rownames(res)[yIndex],],file=paste(strOutput,"/DCA_",j,".vs.",i,"_",j,".peak",sep=""),sep="\t",quote=F,col.names=NA)
     
-    Col <- rep("gray",nrow(normP))
+    Col <- rep("gray",nrow(res))
     Col[xIndex] <- COL[i]
     Col[yIndex] <- COL[j]
     
-    x <- apply(normP[,pClass==i,drop=F],1,mean)
-    y <- apply(normP[,pClass==j,drop=F],1,mean)
+    x <- apply(normP[rownames(res),pClass==i,drop=F],1,mean)
+    y <- apply(normP[rownames(res),pClass==j,drop=F],1,mean)
     xlim <- range(x)
     ylim <- range(y)
     xlab <- paste(i,": log2 Mean normalized tag",sep="")
@@ -131,17 +131,14 @@ for(i in unique(pClass)){
     
     plot(c(),c(),xlab=xlab,ylab=ylab,xlim=xlim,ylim=ylim)
     for(k in c("gray",COL[c(i,j)])){
+      index <- rep(T,sum(Col==k))
       if(k == "gray"){
         tryM <- try(f1 <- MASS::kde2d(x[Col==k],y[Col==k],n=100),silent=T)
-        if(is.null(names(tryM))){
-          index <- rep(T,sum(Col==k))
-        }else{
+        if(!is.null(names(tryM))){
           image(f1,col=imageCOL,add=T)
           imageZero <- diff(range(f1$z))/length(imageCOL)
           index <- apply(cbind(x[Col==k],y[Col==k]),1,function(x,fit,cutZero){return(fit$z[sum((x[1]-fit$x)>=0),sum((x[2]-fit$y)>=0)]<cutZero)},f1,imageZero)
         }
-      }else{
-        index <- rep(T,sum(Col==k))
       }
       points(x[Col==k][index],y[Col==k][index],pch=20,col=k,cex=1)
     }
