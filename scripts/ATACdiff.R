@@ -36,7 +36,7 @@ options = getopt(spec,opt=commandArgs(trailingOnly=TRUE)[-c(1:2)])
 if(sum(names(options)=="strInfo")==1) strInfo <- options$strInfo
 if(sum(names(options)=="pClass")==1) pClass <- unlist(strsplit(options$pClass,","))
 if(sum(names(options)=="output")==1) strOutput <- options$output
-if(sum(names(options)=="logFC")==1) logFC <- options$logFC
+if(sum(names(options)=="logFC")==1) logFC <- as.numeric(options$logFC)
 if(is.null(strInfo)&&is.null(pClass)){
   stop("ERROR: one of -f/-s has to be provided for DCA analysis\n")
 }
