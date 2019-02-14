@@ -10,11 +10,11 @@ if(length(args)<2){
   cat("\n\nO'Young:\nPlot the significant p-values of top known motifs of different conditions as a heatmap\n")
   cat("\tusage: ATACmotif.R </path/to/a/folder/contains/all/homer/motif/folders or /path/file> topN [-f /path/to/the/result/pdf -i /deNovo/motif/index]\n")
   cat("\t</path/to/a/folder/contains/all/homer/motif/folders or /path/file>: A path to a folder or a file which contains homer motif analyses result folders,\n")
-  cat("\t\twhich all different conditions would be plotted. File contains a header with four columns, separated by '\\t':\n")
+  cat("\t\twhich all different conditions would be plotted. File contains a header (e.g. motifFolder\tCol\tknown\tdeNovo) with four columns, separated by '\\t':\n")
   cat("\t\t\tfirst column is the path to the homer motif folder;\n")
   cat("\t\t\tsecond column the color for this sample, such as #FF0000;\n")
   cat("\t\t\tthird column is the ranking index of known motif to be included, such as 1,4,5, if empty, motif from others will be used;\n")
-  cat("\t\t\tfourth column is the ranking index of known motif to be included, such as 1,4,5, if empty, motif from others will be used;\n")
+  cat("\t\t\tfourth column is the ranking index of deNovo motif to be included, such as 1,4,5, if empty, motif from others will be used;\n")
   cat("\ttopN: A number indicate the top motifs to be selected.\n")
   cat("\t/path/to/the/result/pdf: (optional use -f) The pdf file where the result should be plotted, default, 'allMotif.pdf' in the folder as first specified parameter\n")
   cat("\t/deNovo/motif/index: (optional use -i) indicate the index of de novo motif to be plotted, seperated by ',', default: 1,2,3,...,topN\n")
@@ -80,7 +80,10 @@ for(i in strDir){
     lay <- matrix(c(1,1,2,2,2,3,4),nrow=1)
     for(j in as.numeric(kIndex[[basename(i)]])){
       strLogo <- paste(i,"/knownResults/known",j,".logo.svg",sep="")
-      if(!file.exists(gsub("svg$","ps",strLogo))) system(paste("inkscape ",strLogo," --export-ps=",gsub("svg$","ps",strLogo),sep=""))
+      if(!file.exists(gsub("svg$","ps",strLogo))){
+        cat("generate",strLogo,"\n")
+        system(paste("inkscape ",strLogo," --export-ps=",gsub("svg$","ps",strLogo),sep=""))
+      }
       if(!file.exists(gsub("svg$","xml",strLogo))) PostScriptTrace(gsub("svg$","ps",strLogo),gsub("svg$","xml",strLogo))
       logos[[sapply(strsplit(one[j,1],"\\/"),head,1)]] <- readPicture(gsub("svg$","xml",strLogo))
       oneTable <- c(oneTable,
