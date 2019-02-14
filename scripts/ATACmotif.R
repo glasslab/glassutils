@@ -81,7 +81,8 @@ for(i in strDir){
     for(j in as.numeric(kIndex[[basename(i)]])){
       strLogo <- paste(i,"/knownResults/known",j,".logo.svg",sep="")
       if(!file.exists(gsub("svg$","ps",strLogo))){
-        cat("generate",strLogo,"\n")
+        cat("generating",strLogo,"\n")
+        cat(paste("inkscape ",strLogo," --export-ps=",gsub("svg$","ps",strLogo),sep=""),"\n")
         system(paste("inkscape ",strLogo," --export-ps=",gsub("svg$","ps",strLogo),sep=""))
       }
       if(!file.exists(gsub("svg$","xml",strLogo))) PostScriptTrace(gsub("svg$","ps",strLogo),gsub("svg$","xml",strLogo))
