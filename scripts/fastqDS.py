@@ -32,4 +32,4 @@ with open(srcTmp,"r") as src:
                 output.write(line3)
                 output.write(line4)
 os.system("gzip "+dstTmp)
-#os.system("rm "+srcTmp)
+os.system("rm "+srcTmp)
