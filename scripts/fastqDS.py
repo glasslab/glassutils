@@ -18,7 +18,7 @@ dstFastq = sys.argv[3]
 srcTmp = srcFastq.replace("fastq.gz","fastq")
 dstTmp = dstFastq.replace("fastq.gz","fastq")
 
-#os.system("gunzip -c "+srcFastq+" > "+srcTmp)
+os.system("gunzip -c "+srcFastq+" > "+srcTmp)
 
 with open(srcTmp,"r") as src:
     with open(dstTmp, "w") as output:
