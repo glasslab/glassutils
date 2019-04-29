@@ -22,7 +22,7 @@ strInput <- args[1]
 if(file.exists(strInput) && !dir.exists(strInput)){
   strDir <- unlist(read.table(strInput,as.is=T))
 }else if(dir.exists(strInput)){
-  strDir <- list.dirs(strInput,recursive=F)[-1]
+  strDir <- list.dirs(strInput,recursive=F)#[-1]
   #strDir <- strDir[strDir!=strInput]
 }else{
   stop("unknown input!")
@@ -30,7 +30,7 @@ if(file.exists(strInput) && !dir.exists(strInput)){
 #cat("Extract alignment stats from:\n",paste(strDir,collapse="\n"),"\n",sep="\t")
 ######################################################
 ## stats
-stat.names <- c("alignerTotal","alignerUnique","alignerUniqueRate","alignerMulti","homerUniPos","homerTotal","tagPosition","homerAvgLength","mitoNum","mitoRate")
+stat.names <- c("alignerTotal","alignerUnique","alignerUniqueRate","alignerMulti","homerUniPos","homerTotal","tagPosition","FragLength","peakSize","homerAvgLength","mitoNum","mitoRate")
 stat <- matrix(NA,nrow=length(strDir),ncol=length(stat.names),dimnames=list(strDir,stat.names))
 
 for(i in strDir){
@@ -53,6 +53,8 @@ for(i in strDir){
   stat[i,"homerUniPos"] <- as.numeric(res[1,"Unique.Positions"])#grepl("genome=",res[,1])
   stat[i,"homerTotal"] <- as.numeric(res[1,"Total.Tags"])#grepl("genome=",res[,1])
   stat[i,"tagPosition"] <- res[1,"Total.Tags"]/res[1,"Unique.Positions"]
+  stat[i,"FragLength"] <- as.numeric(gsub("fragmentLengthEstimate=","",res[grepl("fragmentLengthEstimate",res[,1]),1]))
+  stat[i,"peakSize"] <- as.numeric(gsub("peakSizeEstimate=","",res[grepl("peakSizeEstimate",res[,1]),1]))
   stat[i,"homerAvgLength"] <- as.numeric(gsub("averageTagLength=","",res[grepl("averageTagLength",res[,1]),1]))
   if(file.exists(paste(i,"/tagInfo_with_M.txt",sep=""))) res <- read.table(paste(i,"/tagInfo_with_M.txt",sep=""),sep="\t",as.is=T,header=T)
   index <- res[,1]=="chrM"

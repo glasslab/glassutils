@@ -635,9 +635,7 @@ $glassomeOutputDirectory/tag_directories\n"
         command+="cp $outputDirectory/sam_files/$samName \
 ${glassomeOutputDirectory}\n"
     fi
-
-    
-
+    command+="chmod -r g+w $glassomeOutputDirectory\n"
 
     # create qsub script
     if $no_emails

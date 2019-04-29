@@ -73,7 +73,7 @@ colnames(rawC) <- sID
 
 distalC <- rawC[(is.na(rawTags$'Distance to TSS')|abs(rawTags$'Distance to TSS')>distal),]#&grepl("Intergenic",rawTags$Annotation,ignore.case=T)
 if(distal<1000) distalC <- rawC[is.na(rawTags$'Distance to TSS')|abs(rawTags$'Distance to TSS')>distal,]
-#distalC <- distalC[apply(distalC,1,function(x){return(sum(x>8))})>1,]
+distalC <- distalC[apply(distalC,1,function(x){return(sum(x>4))})>1,]
 ## DESeq2 -----
 cat("Total distal peaks:",nrow(distalC),"\n")
 require(DESeq2,quietly=T)
