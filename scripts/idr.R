@@ -3,7 +3,6 @@
 ## idr.R
 ##
 ###################################
-
 args <- commandArgs(trailingOnly=TRUE)
 if(length(args)<1){
   cat("\n\nO'Young:\nCalculate the IDR peaks for 2 replications\n")
@@ -17,8 +16,8 @@ threshold <- 0.05
 strPeak1 <- args[1]
 strPeak2 <- args[2]
 strIDR <- ""
-if(grepl("-s",args)) threshold <- as.numeric(args[grep("-s",args)+1])
-if(grepl("-p",args)) strIDR <- args[grep("-p",args)+1]
+if(sum(grepl("-s",args))>0) threshold <- as.numeric(args[grep("-s",args)+1])
+if(sum(grepl("-p",args))>0) strIDR <- args[grep("-p",args)+1]
 
 peak1 <- read.table(strPeak1,sep="\t",as.is=T)
 peak2 <- read.table(strPeak2,sep="\t",as.is=T)
