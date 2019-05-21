@@ -60,12 +60,12 @@ for(i in strDir){
   index <- res[,1]=="chrM"
   if(sum(index)==1){
     stat[i,"mitoNum"] <- as.numeric(res[index,"Total.Tags"])
+    stat[i,"mitoRate"] <- stat[i,"mitoNum"]/ as.numeric(res[1,"Total.Tags"])
   }else if(sum(index)==0){
-    stat[i,"mitoNum"] <- 0
+    stat[i,"mitoRate"] <- stat[i,"mitoNum"] <- 0
   }else{
     stop("ERROR: more than one chrM")
   }
-  stat[i,"mitoRate"] <- stat[i,"mitoNum"]/ stat[i,"homerTotal"]
 }
 cat("\t",paste(colnames(stat),collapse="\t"),"\n",sep="")
 for(i in rownames(stat)) cat(i,"\t",paste(stat[i,],collapse="\t"),"\n",sep="")

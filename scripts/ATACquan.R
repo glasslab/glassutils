@@ -11,11 +11,12 @@
 args <- commandArgs(trailingOnly=TRUE)
 if(length(args)<2){
   cat("\n\nO'Young:\nQuantify the tags in (provided) peaks (default the IDR peaks)\n")
-  cat("\tusage: ATACquan.R /path/to/the/file/listed/sample/tag/directories genome [-f /path/to/peak/files -o /path/to/the/result/folder/ -d distal -s size]\n")
+  cat("\tusage: ATACquan.R /path/to/the/file/listed/sample/tag/directories genome [-f /path/to/peak/files -p /path/to/idr/peaks -o /path/to/the/result/folder/ -d distal -s size]\n")
   cat("\t/path/to/the/file/listed/sample/tag/directories: The file contains path of tag directories.\n")
   cat("\tgenome: mm10 or hg38\n")
   cat("\t/path/to/peak/files: (optional use -f) path to the peak files (separated by ',', mergePeaks will be used) which will be used to quantify the ATAC tags.\n")
-  cat("\t\tIf not provided, make sure all IDR peak files named as first column of tag directory list file plus '_idr.txt',\n")
+  cat("\t/path/to/idr/peaks: (optional use -p) path of idr peaks which will be used to quantify the ATAC tags.\n")
+  cat("\t\tIf both above not provided, make sure all IDR peak files named as first column of tag directory list file plus '_idr.txt',\n")
   cat("\t\tand located in the same folder as tag directory list file.\n")
   cat("\t/path/to/the/result/folder/: (optional use -o) A path to a folder where the out put files will be saved.\n\t\tDefault: the folder where the tag directory list file is.\n")
   cat("\tdistal: (optional use -d) A number indicate the distance in bp from TSS to be considering distal region. defaul 1000\n")
@@ -35,11 +36,14 @@ distal <- 1000
 pSize <- "given"
 require(getopt)
 spec <- matrix(c("peaks","f",2,"character",
+                 "idr","p",2,"character",
                  "output","o",2,"character",
                  "distal","d",2,"double",
                  "size","s",2,"double"),byrow=TRUE, ncol=4)
 options = getopt(spec,opt=commandArgs(trailingOnly=TRUE)[-c(1:2)])
+#print(options)
 if(sum(names(options)=="peaks")==1) strPeaks <- unlist(strsplit(options$peaks,","))
+if(sum(names(options)=="idr")==1) strPeaks <- paste(options$idr,rownames(tagInfo),"_idr.txt",sep="")
 if(sum(names(options)=="output")==1) strOutput <- options$output
 if(sum(names(options)=="distal")==1) distal <- options$distal
 if(sum(names(options)=="size")==1) pSize <- options$size
