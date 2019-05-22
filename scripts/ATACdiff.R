@@ -43,7 +43,9 @@ if(is.null(strInfo)&&is.null(pClass)){
 ## get the sample information ----
 COL <- NULL
 if(!is.null(strInfo)){
+  #cat(strInfo,"\n")
   tagInfo <- read.table(strInfo,sep="\t",row.names=1,as.is = T,comment.char = "")
+  #cat("grp code:",rownames(tagInfo),"\n")
   pClass <- c()
   for(i in rownames(tagInfo)){
     sID <- c(sID,paste(i,unlist(strsplit(tagInfo[i,2],";")),sep="_"))
@@ -64,6 +66,7 @@ if(is.null(sID)){
   }
 }
 ## process ------
+cat(strTags,"\n")
 rawTags <- read.table(strTags,as.is=T,sep="\t",header=T,row.names=1,quote="",comment.char="",check.names=F)
 cat("Total peaks:",nrow(rawTags),"\n")
 rawC <- as.matrix(rawTags[,-(1:18)])

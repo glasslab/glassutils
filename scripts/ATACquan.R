@@ -30,7 +30,7 @@ if(length(args)<2){
 strTags <- args[1]
 strGenome <- args[2]
 tagInfo <- read.table(strTags,sep="\t",row.names=1,as.is = T)
-strOutput <- strPath <- paste(dirname(strTags),"/",sep="")
+strPath <- paste(dirname(strTags),"/",sep="")
 strPeaks <- paste(strPath,rownames(tagInfo),"_idr.txt",sep="")
 distal <- 1000
 pSize <- "given"
@@ -44,7 +44,7 @@ options = getopt(spec,opt=commandArgs(trailingOnly=TRUE)[-c(1:2)])
 #print(options)
 if(sum(names(options)=="peaks")==1) strPeaks <- unlist(strsplit(options$peaks,","))
 if(sum(names(options)=="idr")==1) strPeaks <- paste(options$idr,rownames(tagInfo),"_idr.txt",sep="")
-if(sum(names(options)=="output")==1) strOutput <- options$output
+if(sum(names(options)=="output")==1) strPath <- options$output
 if(sum(names(options)=="distal")==1) distal <- options$distal
 if(sum(names(options)=="size")==1) pSize <- options$size
 
@@ -77,7 +77,7 @@ STATs[3,] <- 1-apply(normCounts,2,sum)/10000000
 STATs[1,] <- apply(normCounts[!is.na(normTags$Distance.to.TSS)&normTags$Distance.to.TSS<=distal,],2,sum)/10000000
 STATs[2,] <- apply(normCounts[is.na(normTags$Distance.to.TSS)|normTags$Distance.to.TSS>distal,],2,sum)/10000000
 COL <- c("#ef8a62","#2166ac","#4d4d4d")
-pdf(paste(strOutput,"ATACquan_dist.pdf",sep=""),width=9)
+pdf(paste(strPath,"ATACquan_dist.pdf",sep=""),width=9)
 par(mar=c(12,2,0,0)+0.2,mgp=c(0.5,0,0),tcl=-0.03)
 plot(c(),c(),xlim=c(0,1),ylim=c(0,1),axes=F,xlab="",ylab="")
 legend("center",rownames(STATs),fill=COL)
