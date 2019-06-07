@@ -53,12 +53,13 @@ for(i in 1:nrow(exps)){
     strCMD <- paste("findPeaks",j,"-L 0 -C 0 -fdr 0.9 -minDist 200 -size 200 -o",tail(strF,1))
     system(strCMD)
   }
-  strCMD <- paste("export PATH=/home/jtao/code/seq_merge_pipe:/home/jtao/software/anaconda3/bin:$PATH;run_idr_homerPeaks.py",paste(strF,collapse = " "),strTmp)
+  strTmpF <- paste(strTmp,exps[i,1],"_idr.txt",sep="")
+  strCMD <- paste("idr.R",paste(strF,collapse = " "),"-p",strTmpF)
   system(strCMD)
-  strIDRpng <- paste(strTmp,"/",paste(gsub("\\.txt","",basename(strF)),collapse = "_"),"_idr.out.png",sep="")
+  strIDRpng <- paste(strTmpF,".out.png",sep="")
   file.copy(strIDRpng,paste(strOutput,"/",exps[i,1],"_idr.png",sep=""),overwrite=T)
   strIDR <- paste(strOutput,"/",exps[i,1],"_idr.txt",sep="")
-  file.copy(gsub("out\\.png$","tsv",strIDRpng),strIDR,overwrite=T)
+  file.copy(strTmpF,strIDR,overwrite=T)
   peakN <- c(peakN,sapply(strsplit(system(paste("wc -l",strIDR),T)," "),head,1))
 }
 write.table(cbind(exps[,1],peakN),file=paste(strOutput,"/IDRpeakNumber.txt",sep=""),sep="\t",col.names=F,row.names=F,quote=F)

@@ -40,6 +40,7 @@ if(sum(names(options)=="logFC")==1) logFC <- as.numeric(options$logFC)
 if(is.null(strInfo)&&is.null(pClass)){
   stop("ERROR: one of -f/-s has to be provided for DCA analysis\n")
 }
+if(!dir.exists(strOutput)) dir.create(strOutput)
 ## get the sample information ----
 COL <- NULL
 if(!is.null(strInfo)){

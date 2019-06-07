@@ -6,7 +6,7 @@
 args <- commandArgs(trailingOnly=TRUE)
 if(length(args)<1){
   cat("\n\nO'Young:\nCalculate the IDR peaks for 2 replications\n")
-  cat("\tusage: idr.R /path/to/peak1 /path/to/peak2 [-s idrThreshold] [-p idrThreshold]\n")
+  cat("\tusage: idr.R /path/to/peak1 /path/to/peak2 [-s idrThreshold] [-p /path/to/idr.peak.file]\n")
   cat("\te.g. idr.R rep1.peak rep2.peak\n")
   cat("\n\n")
   q()
@@ -25,16 +25,26 @@ strNarrow1 <- paste(strPeak1,"narrow",sep=".")
 strNarrow2 <- paste(strPeak2,"narrow",sep=".")
 
 ## creat narrow peaks ----------------
-write.table(cbind(peak1[,2:4],peak1[,1],rep(0,nrow(peak1)),peak1[,5],peak1[,8],
-                  -log10(peak1[,12]),-log10(p.adjust(peak1[,12])),
-                  #rep(-1,nrow(peak1)),rep(-1,nrow(peak1)),
-                  round(apply(peak1[,3:4],1,diff)/2)),
-            strNarrow1,sep="\t",col.names=F,row.names=F,quote=F)
-write.table(cbind(peak2[,2:4],peak2[,1],rep(0,nrow(peak2)),peak2[,5],peak2[,8],
-                  -log10(peak2[,12]),-log10(p.adjust(peak2[,12])),
-                  #rep(-1,nrow(peak2)),rep(-1,nrow(peak2)),
-                  round(apply(peak2[,3:4],1,diff)/2)),
-            strNarrow2,sep="\t",col.names=F,row.names=F,quote=F)
+if(ncol(peak1)>8){
+  write.table(cbind(peak1[,2:4],peak1[,1],rep(0,nrow(peak1)),peak1[,5],peak1[,8],
+                    -log10(peak1[,12]),-log10(p.adjust(peak1[,12])),
+                    round(apply(peak1[,3:4],1,diff)/2)),
+              strNarrow1,sep="\t",col.names=F,row.names=F,quote=F)
+  write.table(cbind(peak2[,2:4],peak2[,1],rep(0,nrow(peak2)),peak2[,5],peak2[,8],
+                    -log10(peak2[,12]),-log10(p.adjust(peak2[,12])),
+                    round(apply(peak2[,3:4],1,diff)/2)),
+              strNarrow2,sep="\t",col.names=F,row.names=F,quote=F)
+}else{
+  write.table(cbind(peak1[,2:4],peak1[,1],rep(0,nrow(peak1)),peak1[,5],peak1[,8],
+                    rep(-1,nrow(peak1)),rep(-1,nrow(peak1)),
+                    round(apply(peak1[,3:4],1,diff)/2)),
+              strNarrow1,sep="\t",col.names=F,row.names=F,quote=F)
+  write.table(cbind(peak2[,2:4],peak2[,1],rep(0,nrow(peak2)),peak2[,5],peak2[,8],
+                    rep(-1,nrow(peak2)),rep(-1,nrow(peak2)),
+                    round(apply(peak2[,3:4],1,diff)/2)),
+              strNarrow2,sep="\t",col.names=F,row.names=F,quote=F)
+}
+
 ## run idr ----------------------
 if(nchar(strIDR)==0) strIDR <- paste(strPeak1,basename(strPeak2),"idr.peak",sep="_")
 strOut <- paste(strIDR,"out",sep=".")
