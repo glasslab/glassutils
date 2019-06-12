@@ -50,7 +50,7 @@ for(i in 1:nrow(exps)){
   strF <- c()
   for(j in strD){
     strF <- c(strF,paste(strTmp,"/",basename(j),"_peaks.txt",sep=""))
-    strCMD <- paste("findPeaks",j,"-L 0 -C 0 -fdr 0.9 -minDist 200 -size 200 -o",tail(strF,1))
+    strCMD <- paste("findPeaks",j,"-L 0 -C 0 -fdr 0.99 -minDist 200 -size 200 -o",tail(strF,1))
     system(strCMD)
   }
   strTmpF <- paste(strTmp,exps[i,1],"_idr.txt",sep="")
