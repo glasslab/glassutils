@@ -68,6 +68,7 @@ selMotif <- motifP <- motifR <- c()
 logos <- list()
 #cat(strDir)
 for(i in strDir){
+  i <- gsub("~",normalizePath("~"),i)
   strMotif <- paste(i,"/knownResults.txt",sep="")
   if(file.exists(strMotif)){
     cat("Plotting known motif table for",basename(i),"\n")
@@ -208,6 +209,7 @@ names(COL) <- gsub("_logP","",names(COL))
 #print(COL)
 #print(strDir)
 for(i in strDir){
+  i <- gsub("~",normalizePath("~"),i)
   deNovo <- as.numeric(hIndex[[basename(i)]])
   if(length(deNovo)<=0) next
   ori <- par(mar=c(2,7,max(c(0,(30-length(deNovo)*2))),1)+0.1,mgp=c(0.5,0,0),tcl=-0.1)
