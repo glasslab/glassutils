@@ -47,7 +47,7 @@ if(sum(names(options)=="idr")==1) strPeaks <- paste(options$idr,rownames(tagInfo
 if(sum(names(options)=="output")==1) strPath <- options$output
 if(sum(names(options)=="distal")==1) distal <- options$distal
 if(sum(names(options)=="size")==1) pSize <- options$size
-
+#print(strPeaks)
 ## get peak file (mergePeaks might be needed) ----
 strTmp <- paste(strPath,"ATACquan_tmp/",sep="")
 if(!dir.exists(strTmp)) dir.create(strTmp)

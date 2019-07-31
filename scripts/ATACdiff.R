@@ -144,7 +144,7 @@ for(i in unique(pClass)){
           index <- apply(cbind(x[Col==k],y[Col==k]),1,function(x,fit,cutZero){return(fit$z[sum((x[1]-fit$x)>=0),sum((x[2]-fit$y)>=0)]<cutZero)},f1,imageZero)
         }
       }
-      points(x[Col==k][index],y[Col==k][index],pch=20,col=k,cex=1)
+      points(x[Col==k][index],y[Col==k][index],pch=20,col=k,cex=1,useDingbats = F)
     }
     lines(range(c(xlim,ylim)),range(c(xlim,ylim)),col="gray")
     lines(range(c(xlim,ylim)),range(c(xlim,ylim))+logFC,col="gray",lty=2)
