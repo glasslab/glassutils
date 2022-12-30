@@ -1,4 +1,4 @@
-import GEOparse, sys, os, re
+import GEOparse, sys, os, re, logging
 
 class suppress_output:
     def __init__(self, suppress_stdout=False, suppress_stderr=False):
@@ -35,20 +35,25 @@ def MsgError(strMsg=""):
 def dwOne(gsm,uID,tryN):
   name_regex = r"[\s\*\?\(\),\.;]"
   strDIR = "%s_%s_%s"%("Supp",gsm.get_accession(),re.sub(name_regex, "_", gsm.metadata["title"][0]))
-  extF = os.listdir(strDIR)
-  if any(s.endswith('.gz') for s in extF) and not any(s.endswith('.sra') for s in extF):
-    print("\tSkip! *.gz existed in %s"%strDIR)
-    return()
-  with suppress_output(suppress_stdout=True, suppress_stderr=True):
-      try:
-        gsm.download_SRA('%s@health.ucsd.edu'%uID)
-      except Exception as e:
-        print(e)
-        if tryN<3:
-          print("\tTry again! Max 3 times")
-          dwOne(gsm,uID,tryN+1)
-      else:
-        print("Finished %s\n"%gsm.get_accession())
+  if os.path.isdir(strDIR):
+    extF = os.listdir(strDIR)
+    if any(s.endswith('.gz') for s in extF) and not any(s.endswith('.sra') for s in extF):
+      print("\tSkip! *.gz existed in %s"%strDIR)
+      return()
+  
+  logger.disabled = True
+  try:
+      gsm.download_SRA('%s@health.ucsd.edu'%uID)
+    except Exception as e:
+      print(e)
+      if tryN<3:
+        print("\tTry again! Max 3 times")
+        dwOne(gsm,uID,tryN+1)
+    else:
+      print("Finished %s\n"%gsm.get_accession())
+  logger.disabled = False
+  #with suppress_output(suppress_stdout=True, suppress_stderr=True):
+      
 
 def downloadGEO(strGEO,uID):
   gse = GEOparse.get_GEO(geo=strGEO, destdir="./")
