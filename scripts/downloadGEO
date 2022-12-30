@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+if [[ $# -eq 0 ]]; then
+  echo 
+  echo "Download GEO dataset"
+  echo "Usage: downloadGEO <geo accession number>"
+  echo "e.g. downloadGEO GSE137572"
+  echo "The files will be directly downloaded in the current folder (no new folder will be created): $(pwd)"
+  echo
+else
+  echo "The email $(whoami)@health.ucsd.edu will be sent over to NCBI as an identifier (required)"
+  strCMD=". /bioinformatics/anaconda3_052020/etc/profile.d/conda.sh;conda activate /gpfs/data01/glasslab/home/z5ouyang/.conda/envs/downloadGEO;python -u $(readlink -e $0| xargs dirname)/downloadGEO.py $1 $(whoami)"
+  #echo $strCMD
+  env -i bash -c "eval $strCMD"
+  echo "Thanks for using downloadGEO."
+fi
+

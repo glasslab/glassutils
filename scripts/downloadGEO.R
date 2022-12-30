@@ -3,6 +3,9 @@
 ## download external data from GEO
 ##
 #######################################
+message("Please use a newer version (no '.R' at the end): downloadGEO")
+q()
+
 parallel <- F
 closeAllConnections()
 #require(htmltab)
