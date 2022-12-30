@@ -37,7 +37,11 @@ def downloadGEO(strGEO,uID):
   for gsm_id,gsm in gse.gsms.items():
     print("downloading %s ..."%gsm_id)
     with suppress_output(suppress_stdout=True, suppress_stderr=True):
-      gsm.download_SRA('%s@health.ucsd.edu'%uID)
+      try:
+        gsm.download_SRA('%s@health.ucsd.edu'%uID)
+      except:
+        print("\tdownloading error!")
+        continue
     print("Finished %s"%gsm_id)
 
 def main():
