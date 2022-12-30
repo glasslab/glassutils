@@ -43,12 +43,12 @@ def dwOne(gsm,uID,tryN):
   
   logger.disabled = True
   try:
-      gsm.download_SRA('%s@health.ucsd.edu'%uID)
-    except Exception as e:
-      print(e)
-      if tryN<3:
-        print("\tTry again! Max 3 times")
-        dwOne(gsm,uID,tryN+1)
+    gsm.download_SRA('%s@health.ucsd.edu'%uID)
+  except Exception as e:
+    print(e)
+    if tryN<3:
+      print("\tTry again! Max 3 times")
+      dwOne(gsm,uID,tryN+1)
     else:
       print("Finished %s\n"%gsm.get_accession())
   logger.disabled = False
