@@ -41,6 +41,7 @@ def dwOne(gsm,uID,tryN):
       print("\tSkip! *.gz existed in %s"%strDIR)
       return()
   
+  logger = logging.getLogger()
   logger.disabled = True
   try:
     gsm.download_SRA('%s@health.ucsd.edu'%uID)
