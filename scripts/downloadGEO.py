@@ -1,4 +1,4 @@
-import GEOparse, sys, os
+import GEOparse, sys, os, re
 
 class suppress_output:
     def __init__(self, suppress_stdout=False, suppress_stderr=False):
@@ -32,17 +32,29 @@ def MsgError(strMsg=""):
   print(strMsg)
   exit()
 
-def downloadGEO(strGEO,uID):
-  gse = GEOparse.get_GEO(geo=strGEO, destdir="./")
-  for gsm_id,gsm in gse.gsms.items():
-    print("downloading %s ..."%gsm_id)
-    with suppress_output(suppress_stdout=True, suppress_stderr=True):
+def dwOne(gsm,uID,tryN):
+  strDIR = "%s_%s_%s"%("Supp",gsm.get_accession(),re.sub(name_regex, "_", gsm.metadata["title"][0]))
+  extF = os.listdir(strDIR)
+  if any(s.endswith('.gz') for s in extF) and not any(s.endswith('.sra') for s in extF):
+    print("\tSkip! *.gz existed in %s"%strDIR)
+    return()
+  with suppress_output(suppress_stdout=True, suppress_stderr=True):
       try:
         gsm.download_SRA('%s@health.ucsd.edu'%uID)
-      except:
-        print("\tdownloading error!")
-        continue
-    print("Finished %s"%gsm_id)
+      except Exception as e:
+        print(e)
+        if tryN<3:
+          print("\tTry again! Max 3 times")
+          dwOne(gsm,uID,tryN+1)
+      else:
+        print("Finished %s\n"%gsm.get_accession())
+
+def downloadGEO(strGEO,uID):
+  gse = GEOparse.get_GEO(geo=strGEO, destdir="./")
+  name_regex = r"[\s\*\?\(\),\.;]"
+  for gsm_id,gsm in gse.gsms.items():
+    print("\n*****\ndownloading %s ..."%gsm_id)
+    dwOne(gsm,uID,0)
 
 def main():
   if len(sys.argv)<2:
