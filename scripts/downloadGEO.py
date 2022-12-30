@@ -1,7 +1,5 @@
 import GEOparse, sys, os, re, logging
 
-logging.basicConfig(level=logging.CRITICAL)
-
 class suppress_output:
     def __init__(self, suppress_stdout=False, suppress_stderr=False):
         self.suppress_stdout = suppress_stdout
@@ -44,6 +42,7 @@ def dwOne(gsm,uID,tryN):
       return()  
   try:
     with suppress_output(suppress_stdout=True, suppress_stderr=True):
+      logging.getLogger("GEOparse").setLevel(logging.CRITICAL)
       gsm.download_SRA('%s@health.ucsd.edu'%uID)
   except Exception as e:
     print(e)
