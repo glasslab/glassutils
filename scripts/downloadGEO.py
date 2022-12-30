@@ -33,6 +33,7 @@ def MsgError(strMsg=""):
   exit()
 
 def dwOne(gsm,uID,tryN):
+  name_regex = r"[\s\*\?\(\),\.;]"
   strDIR = "%s_%s_%s"%("Supp",gsm.get_accession(),re.sub(name_regex, "_", gsm.metadata["title"][0]))
   extF = os.listdir(strDIR)
   if any(s.endswith('.gz') for s in extF) and not any(s.endswith('.sra') for s in extF):
@@ -51,7 +52,6 @@ def dwOne(gsm,uID,tryN):
 
 def downloadGEO(strGEO,uID):
   gse = GEOparse.get_GEO(geo=strGEO, destdir="./")
-  name_regex = r"[\s\*\?\(\),\.;]"
   for gsm_id,gsm in gse.gsms.items():
     print("\n*****\ndownloading %s ..."%gsm_id)
     dwOne(gsm,uID,0)
