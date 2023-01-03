@@ -68,6 +68,7 @@ def main():
   print("%s"%uID)
   if prjID.startswith("GSE"):
     downloadGEO(prjID,uID)
+    print("Finished! Thanks for using downloadGEO!")
   else:
     MsgError("Currently only support GSE accessions.")
 
