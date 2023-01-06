@@ -3,8 +3,9 @@
 if [[ $# -eq 0 ]]; then
   echo 
   echo "Download GEO dataset"
-  echo "Usage: downloadGEO <geo accession number>"
+  echo "Usage: downloadGEO <GSE/SRP/PRJNA accession number>"
   echo "e.g. downloadGEO GSE137572"
+  echo "e.g. downloadGEO PRJNA625451"
   echo "The files will be directly downloaded in the current folder (no new folder will be created): $(pwd)"
   echo
 else

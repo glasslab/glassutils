@@ -1,4 +1,6 @@
-import GEOparse, sys, os, re, logging
+import sys, os, re, logging, subprocess #GEOparse, 
+from pysradb.sraweb import SRAweb
+db = SRAweb()
 
 class suppress_output:
     def __init__(self, suppress_stdout=False, suppress_stderr=False):
@@ -31,8 +33,8 @@ def MsgHelp():
 def MsgError(strMsg=""):
   print(strMsg)
   exit()
-
-def dwOne(gsm,uID,tryN):
+    
+def dwOneGSM(gsm,uID,tryN):
   name_regex = r"[\s\*\?\(\),\.;]"
   strDIR = "%s_%s_%s"%("Supp",gsm.get_accession(),re.sub(name_regex, "_", gsm.metadata["title"][0]))
   if os.path.isdir(strDIR):
@@ -43,7 +45,7 @@ def dwOne(gsm,uID,tryN):
   try:
     with suppress_output(suppress_stdout=True, suppress_stderr=True):
       logging.getLogger("GEOparse").setLevel(logging.CRITICAL)
-      gsm.download_SRA('%s@health.ucsd.edu'%uID)
+      gsm.download_SRA('%s@biogen.com'%uID,filetype="fastq",keep_sra=True)
   except Exception as e:
     print(e)
     if tryN<3:
@@ -51,12 +53,41 @@ def dwOne(gsm,uID,tryN):
       dwOne(gsm,uID,tryN+1)
     else:
       print("Finished %s\n"%gsm.get_accession())
+    
+def downloadGEO(strGEO):
+  srp = db.gse_to_srp(strGEO)
+  for i in range(srp.shape[0]):
+    print("\n***** ",srp.study_accession[i]," *****")
+    downloadPRJNA(srp.study_accession[i])
 
-def downloadGEO(strGEO,uID):
-  gse = GEOparse.get_GEO(geo=strGEO, destdir="./")
-  for gsm_id,gsm in gse.gsms.items():
-    print("\n*****\ndownloading %s ..."%gsm_id)
-    dwOne(gsm,uID,0)
+def downloadPRJNA(strPRJNA):
+  df = db.sra_metadata(strPRJNA,detailed=True)
+  df.to_csv("%s.csv"%strPRJNA)
+  print("Downloading all sra ...")
+  db.download(df=df,skip_confirmation=True,out_dir=os.getcwd())
+  print("Obtain fastqs from sra ...")
+  for i in range(df.shape[0]):
+    srr=df.run_accession[i]
+    srp=df.study_accession[i]
+    srx=df.experiment_accession[i]
+    print("%s:%s"%(srx,srr))
+    cmd="cd %s/%s;fastq-dump --gzip --skip-technical --readids --split-3 %s.sra"%(srp,srx,srr)
+    cmdR=subprocess.run(cmd,shell=True,check=True,stdout=subprocess.PIPE)
+  print("Rename sample folder")
+  name_regex = r"[\s\*\?\(\),\.;]"
+  for i in range(df.shape[0]):
+    srp=df.study_accession[i]
+    srx=df.experiment_accession[i]
+    srxTitle=srx+"_"+re.sub(name_regex,"_",df.experiment_title[i])    
+    strPath=os.path.join(srp,srx)
+    if os.path.exists(strPath):
+      os.rename(strPath,os.path.join(srp,srxTitle))
+  print("Rename study folder")
+  for i in range(df.shape[0]):
+    srp=df.study_accession[i]
+    srpTitle=srp+"_"+re.sub(name_regex,"_",df.study_title[i])    
+    if os.path.exists(srp):
+      os.rename(srp,srpTitle)
 
 def main():
   if len(sys.argv)<2:
@@ -65,13 +96,15 @@ def main():
   prjID = sys.argv[1]
   uID = sys.argv[2]
   print("Processing %s"%prjID)
-  print("%s"%uID)
   if prjID.startswith("GSE"):
-    downloadGEO(prjID,uID)
-    print("Finished! Thanks for using downloadGEO!")
+    downloadGEO(prjID)
+  elif prjID.startswith("PRJNA") or prjID.startswith("SRP"):
+    downloadPRJNA(prjID)
   else:
-    MsgError("Currently only support GSE accessions.")
+    MsgError("Currently only support GSE/PRJNA accessions.")
+  
+  print("Thanks for using downloadSRA!")
+  
 
 if __name__ == "__main__":
   main()
-
