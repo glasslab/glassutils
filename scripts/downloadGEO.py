@@ -84,7 +84,7 @@ def downloadPRJNA(strPRJNA,core=4):
     #cmd="cd %s/%s;fastq-dump --gzip --skip-technical --readids --split-3 %s.sra"%(srp,srx,srr)
     cmdR=subprocess.run(cmd,shell=True,check=True,stdout=subprocess.PIPE)
   print("Rename sample folder")
-  name_regex = r"[\s\*\?\(\),\.;]"
+  name_regex = r"[\s\*\?\(\),\.;:\/]"
   for i in range(df.shape[0]):
     srp=df.study_accession[i]
     srx=df.experiment_accession[i]
