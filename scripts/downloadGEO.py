@@ -1,5 +1,6 @@
-import sys, os, re, logging, subprocess #GEOparse, 
+import sys, os, re, logging, subprocess, glob #GEOparse, 
 from pysradb.sraweb import SRAweb
+from datetime import datetime
 db = SRAweb()
 
 class suppress_output:
@@ -60,7 +61,7 @@ def downloadGEO(strGEO):
     print("\n***** ",srp.study_accession[i]," *****")
     downloadPRJNA(srp.study_accession[i])
 
-def downloadPRJNA(strPRJNA):
+def downloadPRJNA(strPRJNA,core=4):
   df = db.sra_metadata(strPRJNA,detailed=True)
   df.to_csv("%s.csv"%strPRJNA)
   print("Downloading all sra ...")
@@ -70,8 +71,17 @@ def downloadPRJNA(strPRJNA):
     srr=df.run_accession[i]
     srp=df.study_accession[i]
     srx=df.experiment_accession[i]
-    print("%s:%s"%(srx,srr))
-    cmd="cd %s/%s;fastq-dump --gzip --skip-technical --readids --split-3 %s.sra"%(srp,srx,srr)
+    strD=os.path.join(srp,srx)
+    strTime = datetime.now().strftime("%Y %B %d %H:%M:%S")
+    print("\t%s - %s:%s"%(strTime,srx,srr))
+    
+    if len(glob.glob("%s/*fastq.gz"%strD))>0:
+      print("\t\tSKIP: fastq.gz exists")
+      continue
+    if not os.path.exists(os.path.join(strD,"%s.sra"%srr)):
+      raise Exception("\t\tERROR: missing sra file in %s"%strD)
+    cmd= "cd %s;fasterq-dump --threads %d --split-3 %s.sra;pigz -p %d *fastq"%(strD,core,srr,core)
+    #cmd="cd %s/%s;fastq-dump --gzip --skip-technical --readids --split-3 %s.sra"%(srp,srx,srr)
     cmdR=subprocess.run(cmd,shell=True,check=True,stdout=subprocess.PIPE)
   print("Rename sample folder")
   name_regex = r"[\s\*\?\(\),\.;]"
