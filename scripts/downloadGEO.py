@@ -65,6 +65,11 @@ def downloadPRJNA(strPRJNA,core=4):
   df = db.sra_metadata(strPRJNA,detailed=True)
   df.to_csv("%s.csv"%strPRJNA)
   print("Downloading all sra ...")
+  if 'sra_url' in df.columns:
+    RMdf = df[df["sra_url"].isna()]
+    if(RMdf.shape[0]>0):
+      print("\n\n******\nThe downloading links are missing for the following samples:\n\t%s\n"%';\n\t'.join(list(RMdf['experiment_title'])))
+      df = df[~df["sra_url"].isna()]
   db.download(df=df,skip_confirmation=True,out_dir=os.getcwd())
   print("Obtain fastqs from sra ...")
   for i in range(df.shape[0]):
